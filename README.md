@@ -1,7 +1,7 @@
 # MemPadPy
 
 - It is a work in Progress
-- do NOt try to use it yet
+- do **NOT** try to use it yet
 - it is here on my Github only for my own source code management :)
 
 MemPadPy is a port in Python of Mempad (for Windows).
