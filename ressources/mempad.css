@@ -1,0 +1,61 @@
+* {
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+}
+
+a {
+    display: block;
+    white-space: pre;
+    color: inherit;
+    text-decoration: none;
+    font-size: 1rem;
+    font-family: monospace;
+}
+
+
+main div {
+    display: none;
+}
+
+
+main div.active {
+    display: block;
+    white-space: pre-wrap;
+
+}
+
+
+/* container */
+body {
+    background-color: #234;
+    color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+
+
+    padding: 0;
+    margin: 0
+}
+
+/* columns */
+body>* {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid gray;
+}
+
+/* tablet breakpoint */
+@media (min-width:768px) {
+    body>main {
+        width: 75%;
+        height: 100vh;
+        overflow: auto;
+    }
+
+    body>aside {
+        width: 25%;
+        height: 100vh;
+
+    }
+}
