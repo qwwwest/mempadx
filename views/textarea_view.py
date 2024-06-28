@@ -7,7 +7,7 @@ class TextAreaView(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.pack(expand=True, fill=tk.BOTH)
-        self.text = tk.Text(self, undo=True, font=("monospace", 14))
+        self.text = tk.Text(self, undo=True, font=("monospace", 14), wrap = tk.WORD)
 
         # Create a vertical scrollbar
         self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.text.yview)
