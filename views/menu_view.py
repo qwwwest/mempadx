@@ -1,5 +1,6 @@
 # views/menu_view.py
 import tkinter as tk
+from tkinter import ttk
 
 class MenuView(tk.Menu):
     def __init__(self, parent):

@@ -8,18 +8,32 @@ from views.textarea_view import TextAreaView
 from views.footer_view import FooterView
 import os
 
+ 
+
 class MainView(tk.Tk):
    
     def __init__(self, controller):
+        dirname = os.path.dirname(os.path.realpath(__file__))
         super().__init__()
-        self.controller = controller
-        #self.model = model    
-        self.title("MemPad")
+
+
+        # Simply set the theme
+        #self.tk.call("source", "/www/py/mempad/views/Azure-ttk-theme/azure.tcl")
+        #self.tk.call("source", "/www/py/mempad/views/sv_ttk/sv.tcl")
+        #self.tk.call("set_theme", "dark")
+
+        #      big_frame = ttk.Frame(self)
+        # big_frame.pack(fill="both", expand=True)     
+        # sv_ttk.set_theme("dark")
+        # self.controller = controller
 
         # Creating object of photoimage class for window icons
-        dirname = os.path.dirname(os.path.realpath(__file__))
+        
         parentdir = os.path.dirname(dirname)
         self.ikon = tk.PhotoImage(file = parentdir + '/ressources/python.png') 
+
+        #self.model = model    
+        self.title("MemPad")
 
         # Setting icon of master window 
         self.iconphoto(False, self.ikon) 

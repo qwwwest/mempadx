@@ -1,6 +1,7 @@
 # controllers/app_controller.py
 
 import tkinter as tk
+import tkinter.ttk as ttk
 from models.mempad_model import MemPadModel
 from views.main_view import MainView
 
@@ -19,7 +20,16 @@ class MainController:
     def init_view(self, View):
  
         self.view = View(self)
+        # self.view.tk.call("source", "/www/py/mempad/views/themes/Azure-ttk-theme/azure.tcl")
+        # self.view.tk.call("set_theme", "light")
 
+        # Import the tcl file
+        self.view.tk.call('source', '/www/py/mempad/views/themes/Forest-ttk-theme/forest-light.tcl')
+
+        # Set the theme with the theme_use method
+        ttk.Style().theme_use('forest-light')
+
+ 
         # Bind treeview selection
         self.view.treeview.tree.bind("<<TreeviewSelect>>", self.on_treeview_select)
 
