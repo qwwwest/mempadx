@@ -15,17 +15,7 @@ class MainView(tk.Tk):
     def __init__(self, controller):
         dirname = os.path.dirname(os.path.realpath(__file__))
         super().__init__()
-
-
-        # Simply set the theme
-        #self.tk.call("source", "/www/py/mempad/views/Azure-ttk-theme/azure.tcl")
-        #self.tk.call("source", "/www/py/mempad/views/sv_ttk/sv.tcl")
-        #self.tk.call("set_theme", "dark")
-
-        #      big_frame = ttk.Frame(self)
-        # big_frame.pack(fill="both", expand=True)     
-        # sv_ttk.set_theme("dark")
-        # self.controller = controller
+ 
 
         # Creating object of photoimage class for window icons
         
@@ -38,7 +28,7 @@ class MainView(tk.Tk):
         # Setting icon of master window 
         self.iconphoto(False, self.ikon) 
 
-        self.geometry("480x320")
+        self.geometry("800x400")
         self.minsize(480,320)
         
         self.menu = MenuView(self)
@@ -66,7 +56,7 @@ class MainView(tk.Tk):
         self.height = 0
         
         self.bind("<Control-s>", self.save)
-        self.bind("<Configure>", self.on_window_resize)
+        # self.bind("<Configure>", self.on_window_resize)
  
 
 

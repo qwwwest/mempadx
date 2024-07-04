@@ -2,9 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from views.main_view import MainView
 from controllers.main_controller import MainController
-import os
- 
-
 
 def main(file):
 

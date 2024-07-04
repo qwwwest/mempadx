@@ -15,13 +15,15 @@ class MainController:
         #Beep.listen('model_new_file', self.info )
         self.current_page = None
         self.last_selected_item = None
+
+        Beep.listen('tree-has-changed',self.tree_has_changed)
+        # Beep.dispatch('page-title-has-changed',page_id, current_title, new_title)
+        Beep.listen('page-title-has-changed',self.page_title_has_changed)
  
     
     def init_view(self, View):
  
         self.view = View(self)
-        # self.view.tk.call("source", "/www/py/mempad/views/themes/Azure-ttk-theme/azure.tcl")
-        # self.view.tk.call("set_theme", "light")
 
         # Import the tcl file
         self.view.tk.call('source', '/www/py/mempad/views/themes/Forest-ttk-theme/forest-light.tcl')
@@ -35,7 +37,7 @@ class MainController:
 
         self.view.textarea.text.event_add( '<<REACT>>', *( '<Motion>', '<ButtonRelease>', '<KeyPress>', '<KeyRelease>' ) )
         b = self.view.textarea.text.bind( '<<REACT>>', self.footer_info )
-        self.footer_info( ) # get the ball rolling
+        self.footer_info( ) # first time
  
     def footer_info(self, ev = None ):
             
@@ -52,8 +54,7 @@ class MainController:
             count = f'({count})'
         
         self.view.footer.setText(f'{r},{c} {count}')
-        
-            
+             
 
     def open(self, file):
         self.model.open(file)
@@ -62,40 +63,59 @@ class MainController:
 
     def populate_tree(self):
         parents = [""]
-         
-        for id, level, title, item in self.model.pages:
-            parents = parents[0:level]
-            node = self.view.treeview.tree.insert(parents[level-1], "end", values=(id,level), text=title, open=True)
-            parents.insert(level, node)
-             
+        tree = self.view.treeview.tree
+       
+        for item in tree.get_children():
+            tree.delete(item)    
+
+        for p in self.model.pages:
+            
+            parents = parents[0:p["level"]]
+            node = self.view.treeview.tree.insert(parents[p["level"]-1], "end", values=(p["id"],p["level"]), text=p["title"], open=True)
+            parents.insert(p["level"], node)
+            # print(id)
+
+        self.last_selected_item = None
 
     def on_treeview_select(self, event):
- 
+        print('on_treeview_select', self.view.treeview.ghost_node, self.last_selected_item)
         tree = self.view.treeview.tree
+        
+        if len(tree.selection()) == 0: 
+           return
         new_selected_item = tree.selection()[0]
-        id = int(tree.item(new_selected_item, "values")[0])
+        if self.view.treeview.ghost_node != None:
+            tree.selection_remove(new_selected_item)
+            return
+       
+        id = self.view.treeview.get_item_mid(new_selected_item)
 
+        if self.last_selected_item == new_selected_item:
+            # tree.selection_set(self.last_selected_item)
+            return
+        
         if self.last_selected_item:
-            view_id = int(tree.item(self.last_selected_item, "values")[0])
+            tree.selection_remove(self.last_selected_item)
+            view_id = self.view.treeview.get_item_mid(self.last_selected_item)
             if view_id == id :
                 return
             
-            view_level = tree.item(self.last_selected_item, "values")[1]
+            view_level = self.view.treeview.get_item_mlevel(self.last_selected_item)
             view_title = tree.item(self.last_selected_item, "text")
             view_content = self.view.textarea.content
-            self.model.setPageById(view_id, view_level,view_title, view_content)
+            self.model.set_page_by_id(view_id, view_level, view_title, view_content)
             self.footer_info()
             
 
-        [id, level, title, content] = self.model.getPageById(id)
+        page = self.model.get_page_by_id(id)
  
-        self.view.textarea.content = content
+        self.view.textarea.content = page["content"]
         # after changing content, we reset the undo/redo stack
         self.view.textarea.text.edit_reset() 
         self.last_selected_item = new_selected_item
         
 
-    def get_content_by_title(self, title):
+    def _____________get_content_by_title(self, title):
         pages = self.model.get_pages()
         for page in pages:
             if page.title == title:
@@ -110,7 +130,7 @@ class MainController:
     def save(self):
         self.model.save()
 
-    def select_page(self, page):
+    def ________________select_page(self, page):
         self.model.current_page = page
         return page.content
     
@@ -122,9 +142,41 @@ class MainController:
         new_page = self.model.add_page(after_id, level_increment=0)
         self.view.treeview.populate_tree()
 
-    def delete_item(self, page_id):
+    def _________________delete_item(self, page_id):
         self.model.delete_page(page_id)
-        self.view.treeview.populate_tree()
+        self.populate_tree()
 
-    def rename_item(self, page_id, new_title):
-        self.model.rename_page(page_id, new_title)
+    def tree_has_changed(self, *args):
+        print("tree_has_changed")
+        tree = self.view.treeview.tree
+        pages = []
+        self.walk_tree(tree.get_children(), 1, pages) 
+        self.model.set_pages(pages)
+        self.populate_tree()
+
+    def page_title_has_changed(self, *args):
+        print("page_titla_has_changed")
+        print(args) 
+                
+        self.model.set_page_title(args[1],args[2])
+        
+
+    def walk_tree(self, children, level, pages ):
+      
+        if not children :
+           return 
+ 
+        for child in children:
+            title = self.view.treeview.tree.item(child, "text")
+            old_id = self.view.treeview.get_item_mid(child)
+            content = self.model.get_content_by_id(old_id)
+            id =  len(pages)
+            pages.append({
+           "id": id, 
+           "level": level, 
+           "title": title, 
+           "content": content})  
+
+            self.walk_tree(self.view.treeview.tree.get_children(child), level + 1, pages) 
+        
+             

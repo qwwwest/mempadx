@@ -25,15 +25,20 @@ class MemPadModel:
     arr = str.split('\0')
 
     pages = []
-    index = 0
+    
      
     for i, item in enumerate(arr):
       if i & 1 == 0 : # titles
         level = ord(item[0])
         title = item[1:]
       else:
-        pages.append([ len(pages), level, title, item])
-        index += 1 
+        #pages.append([ len(pages), level, title, item])
+        pages.append({
+           "id": len(pages), 
+           "level": level, 
+           "title": title, 
+           "content": item})
+      
       
     self.__pages = pages
     self.__num_pages = len(pages)
@@ -48,15 +53,37 @@ class MemPadModel:
   def pages(self):
       return self.__pages
   
-  def getPageById(self, id):
+  def set_pages(self, pages):
+      self.__pages = pages
+  
+  def get_page_by_id(self, id):
       id = int(id)
       return self.__pages[id]
   
-  def setPageById(self, id, level, title, content):
+  def set_page_by_id(self, id, level, title, content):
       
-      self.__pages[id] = [ id, level, title, content]
+      self.__pages[id] = {
+           "id": id, 
+           "level": level, 
+           "title": title, 
+           "content": content}
+
+  def set_content_by_id(self, id, content):
+      p = self.__pages[id] 
+      p["content"] = content     
+
+  def get_content_by_id(self, id):
+      p = self.__pages[id] 
+      return p["content"]
   
-  def toHtmlFile(self,filename = None):
+  def get_page_title(self, id):
+      p = self.__pages[id] 
+      return p["title"]
+     
+  def set_page_title(self, id, title):
+      p = self.__pages[id] 
+      p["title"] = title   
+  def export_to_html(self,filename = None):
     "write to html"  
     
     links = ''
@@ -65,13 +92,14 @@ class MemPadModel:
     if not filename :
       filename = f'{self.__filename[0:-4]}.html'
 
-    for id, level, title, page in self.__pages :
+    for page in self.__pages :
+      id, level, title, content = page.id, page.level, page.title, page.content 
       dots = ' ' * (level - 1)
       links += f'<a href="javascript:show({id})">{dots}{title}</a>\n'
      
       if title[:-4] != '.ini' :
-        page = markdown.markdown(page)
-      pages += f'<div id="id{id}">{page}</div>\n'
+        content = markdown.markdown(content)
+      pages += f'<div id="id{id}">{content}</div>\n'
 
     html = MemPadModel.__readFile(self.__dir + '/assets/template.html')
     css = MemPadModel.__readFile(self.__dir + '/assets/mempad.css')
@@ -97,7 +125,7 @@ class MemPadModel:
     f.close()  
     return str
 
-  def add_page(self, parent_id, level_increment):
+  def ___add_page(self, parent_id, level_increment):
       parent_page = None
       for page in self.pages:
           if page.id == parent_id:
@@ -111,10 +139,6 @@ class MemPadModel:
       return new_page
 
   def delete_page(self, page_id):
-      self.pages = [page for page in self.pages if page.id != page_id]
+      self.__pages = [page for page in self.__pages if page["id"] != page_id]
 
-  def rename_page(self, page_id, new_title):
-        for page in self.pages:
-            if page.id == page_id:
-                page.title = new_title
-                break
+ 
