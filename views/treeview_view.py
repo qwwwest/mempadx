@@ -31,10 +31,13 @@ class TreeView(tk.Frame):
         
         # Create right-click menu
         self.menu = tk.Menu(self, tearoff=0)
+
+        self.menu.add_command(label="Insert before", command=self.add_item_before)
+        self.menu.add_command(label="Add as child", command=self.add_child_item)
+        self.menu.add_command(label="Add as next", command=self.add_item_after)
+        self.menu.add_separator()
+
         self.menu.add_command(label="Rename Item", command=self.rename_item)
-        # self.menu.add_command(label="Add child", command=self.add_child_item)
-        # self.menu.add_command(label="Add Before", command=self.add_item_after)
-        self.menu.add_command(label="Add Page", command=self.add_item_after)
         self.menu.add_command(label="Delete Item", command=self.delete_item)
         # self.menu.add_command(label="Copy", command=self.delete_item)
         # self.menu.add_command(label="Move", command=self.delete_item)
@@ -44,7 +47,6 @@ class TreeView(tk.Frame):
         self.tree.bind('<ButtonPress-1>', self.on_start_drag)
         self.tree.bind('<B1-Motion>', self.on_drag)
         self.tree.bind('<ButtonRelease-1>', self.on_drop)
-
 
 
         # Event bindings to display page content on click
@@ -76,12 +78,44 @@ class TreeView(tk.Frame):
     def add_child_item(self):
         selected_item = self.tree.selection()[0]
         page_id = self.get_item_mid(selected_item)
-        self.controller.add_child_item(page_id)
+
+        new_title = askstring("New Page", "Enter title:\t\t\t\t\t")
+        if new_title:
+            # self.tree.item(selected_item, text=new_title)
+            Beep.dispatch('add_page_child', page_id, new_title)
+            
+
+
+    def add_item_before(self):
+        selected_item = self.tree.selection()[0]
+        
+        index = self.tree.index(selected_item)
+        parent = self.tree.parent(selected_item)
+        level = self.get_item_mlevel(selected_item)
+
+        title = askstring("New Page", "Enter title:\t\t\t\t\t")
+        
+        if title:
+            item = self.tree.insert(parent,index,text=title, values=(-1,level))
+            self.tree.selection_set(item)
+            Beep.dispatch('tree-has-changed')
+
 
     def add_item_after(self):
         selected_item = self.tree.selection()[0]
-        page_id = self.get_item_mid(selected_item)
-        self.controller.add_item_after(page_id)
+        
+        index = self.tree.index(selected_item)
+        parent = self.tree.parent(selected_item)
+        level = self.get_item_mlevel(selected_item)
+
+        title = askstring("New Page", "Enter title:\t\t\t\t\t")
+        
+        
+        if title:
+            item = self.tree.insert(parent,index+1,text=title, values=(-1,level))
+            # self.tree.item(selected_item, text=new_title)
+            self.tree.selection_set(item)
+            Beep.dispatch('tree-has-changed')
 
     def delete_item(self):
         selected_item = self.tree.selection()[0]
@@ -90,32 +124,45 @@ class TreeView(tk.Frame):
         if num == 0:
             message = 'DELETE this page?'
         else:
-            message = f"""DELETE this page
-            and its {num} children?
-            """ 
+            message = f"DELETE this page and its {num} children?" 
    
-        doDelete = askyesno("Delete Page", message)
-        if not doDelete:
-            return
+         
+        if askyesno("Delete Page", message):
+            new_select =  self.tree.next(selected_item) 
+
+            if not new_select:
+                new_select =  self.tree.prev(selected_item)
+
+            if not new_select:
+                new_select =  self.tree.parent(selected_item)
+
+          
+            self.tree.delete(selected_item)
+            self.tree.selection_set(new_select)
+            Beep.dispatch('tree-has-changed', page_id)
         
-        self.tree.delete(selected_item)
-        Beep.dispatch('tree-has-changed', page_id)
+        
         
  
 
+    def get_selected_item(self):
+        select = self.tree.selection()
+        if select:
+            return select[0]
+        return None
+    
     def rename_item(self):
         selected_item = self.tree.selection()[0]
         page_id = self.get_item_mid(selected_item)
         current_title = self.tree.item(selected_item, "text")
         new_title = askstring("Rename Page", "Enter new title:\t\t\t\t\t", initialvalue=current_title)
-        if new_title:
-            # self.controller.rename_item(page_id, new_title)
+        if new_title and new_title != current_title:
             self.tree.item(selected_item, text=new_title)
             Beep.dispatch('page-title-has-changed',page_id, new_title)
 
 
     def on_start_drag(self, event):
-        print('on_start_drag')
+       
         item = self.tree.identify_row(event.y)
         self.tree.tag_configure('highlight', background='#eeeeee', foreground='#888888')
         self.tree.tag_configure('cut', foreground='#cccccc')
@@ -130,7 +177,7 @@ class TreeView(tk.Frame):
 
 
     def on_drag(self, event):
-        print('on_drag')
+      
         if self.drag_data["item"] == None:
             return
         
@@ -156,7 +203,13 @@ class TreeView(tk.Frame):
             return        
        
         x,y,w,h = res
-        if event.x < w / 2:
+        
+        delta_x = event.x - self.drag_data["x"]
+      
+        #    delta_y = event.y - self.drag_data["y"]
+        
+        #if event.x < w / 2:
+        if delta_x <-10 :
             if event.y < h/2:
                 index = self.tree.index(target) - 1
             else: 
@@ -180,7 +233,7 @@ class TreeView(tk.Frame):
          
 
     def on_drop(self, event):
-        print('on_drop')
+        
         self.tree.tk.call(self.tree, "tag", "remove", "highlight")
         self.tree.tk.call(self.tree, "tag", "remove", "cut")
         
@@ -208,10 +261,10 @@ class TreeView(tk.Frame):
                 # self.parent.move_page(source_id, target_id)
  
 
-            self.tree.selection_add(item)
+            self.tree.selection_set(item)
             Beep.dispatch('tree-has-changed', self.tree)
  
-    def update(self):
+    def __________update(self):
        # if event in ["page_added", "page_deleted", "page_renamed", "page_moved"]:
              
             Beep.dispatch('tree-has-changed', self.tree)      

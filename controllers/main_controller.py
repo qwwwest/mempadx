@@ -19,6 +19,9 @@ class MainController:
         Beep.listen('tree-has-changed',self.tree_has_changed)
         # Beep.dispatch('page-title-has-changed',page_id, current_title, new_title)
         Beep.listen('page-title-has-changed',self.page_title_has_changed)
+        Beep.listen('add_page_child',self.add_page)
+        #Beep.listen('add_page_after',self.add_page)
+        #Beep.listen('add_page_before',self.add_page)
  
     
     def init_view(self, View):
@@ -61,24 +64,31 @@ class MainController:
         self.populate_tree()
         self.view.title('Mempad - '+file)
 
-    def populate_tree(self):
+    def populate_tree(self, idsel = 0):
         parents = [""]
         tree = self.view.treeview.tree
+
+        #idsel = self.new_selected_item
        
+        # we clean up the old tree
         for item in tree.get_children():
             tree.delete(item)    
-
-        for p in self.model.pages:
-            
+        snode = None
+        for id, p in enumerate(self.model.pages) :
             parents = parents[0:p["level"]]
             node = self.view.treeview.tree.insert(parents[p["level"]-1], "end", values=(p["id"],p["level"]), text=p["title"], open=True)
+            if p["id"] == idsel:
+                snode = node
             parents.insert(p["level"], node)
-            # print(id)
 
+        if snode:
+            self.view.treeview.tree.selection_add(snode)
         self.last_selected_item = None
 
+
+
     def on_treeview_select(self, event):
-        print('on_treeview_select', self.view.treeview.ghost_node, self.last_selected_item)
+       
         tree = self.view.treeview.tree
         
         if len(tree.selection()) == 0: 
@@ -114,18 +124,7 @@ class MainController:
         self.view.textarea.text.edit_reset() 
         self.last_selected_item = new_selected_item
         
-
-    def _____________get_content_by_title(self, title):
-        pages = self.model.get_pages()
-        for page in pages:
-            if page.title == title:
-                return page.content
-        return ""
-
-    def info(self, *args):
-        print('info: ', *args)    
-
- 
+  
 
     def save(self):
         self.model.save()
@@ -134,12 +133,18 @@ class MainController:
         self.model.current_page = page
         return page.content
     
-    def add_child_item(self, parent_id):
-        new_page = self.model.add_page(parent_id, level_increment=1)
-        self.view.treeview.populate_tree()
+    def add_page(self, type, parent_id, title):
+        if type == "add_page_child":
+            new_page = self.model.add_page_child(parent_id,title)
 
-    def add_item_after(self, after_id):
-        new_page = self.model.add_page(after_id, level_increment=0)
+        # if type == "add_page_after":
+        #     new_page = self.model.add_page_after(parent_id,title)
+
+        if new_page:    
+            self.populate_tree(self.model.current_page)
+
+    def __________________________add_item_after(self, message, after_id):
+        new_page = self.model.add_page_child(after_id, level_increment=0)
         self.view.treeview.populate_tree()
 
     def _________________delete_item(self, page_id):
@@ -147,35 +152,49 @@ class MainController:
         self.populate_tree()
 
     def tree_has_changed(self, *args):
-        print("tree_has_changed")
+       
+      
         tree = self.view.treeview.tree
+        selected = self.view.treeview.get_selected_item()
+       
         pages = []
+        self.new_selected_item = 0
         self.walk_tree(tree.get_children(), 1, pages) 
         self.model.set_pages(pages)
-        self.populate_tree()
+      
+        self.populate_tree(self.new_selected_item)
 
-    def page_title_has_changed(self, *args):
-        print("page_titla_has_changed")
-        print(args) 
-                
-        self.model.set_page_title(args[1],args[2])
+    def page_title_has_changed(self, event, id, title):
+         
+        self.model.set_page_title(id, title)
         
 
     def walk_tree(self, children, level, pages ):
       
         if not children :
            return 
- 
+
+        selected_item = self.view.treeview.get_selected_item()
         for child in children:
             title = self.view.treeview.tree.item(child, "text")
             old_id = self.view.treeview.get_item_mid(child)
-            content = self.model.get_content_by_id(old_id)
             id =  len(pages)
+            if old_id == -1:
+                content = ''
+            else:
+                content = self.model.get_content_by_id(old_id)
+
+           
+            if old_id == -1 or child == selected_item:
+                 
+                self.new_selected_item = id
+
             pages.append({
            "id": id, 
            "level": level, 
            "title": title, 
-           "content": content})  
+           "content": content
+           })  
 
             self.walk_tree(self.view.treeview.tree.get_children(child), level + 1, pages) 
         

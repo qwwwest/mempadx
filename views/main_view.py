@@ -33,8 +33,8 @@ class MainView(tk.Tk):
         
         self.menu = MenuView(self)
 
-        self.toolbar = ToolbarView(self)
-        self.toolbar.pack(side=tk.TOP, fill=tk.X)
+       #  self.toolbar = ToolbarView(self)
+      #  self.toolbar.pack(side=tk.TOP, fill=tk.X)
 
         # Initialize the footer
         self.footer = FooterView(self)
@@ -76,7 +76,7 @@ class MainView(tk.Tk):
 
         fh = self.footer.label.winfo_height()
         self.paned_window.winfo_height
-        print(f"  resized to {event.width}x{event.height}")
+    
 
 
     def save(self, event=None):

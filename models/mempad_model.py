@@ -9,6 +9,7 @@ class MemPadModel:
   def __init__(self):
     self.__pages = []
     self.__num_pages = 0
+    self.__current_page = 0
     self.__filename = ''
    
   def open(self, filename):
@@ -43,18 +44,16 @@ class MemPadModel:
     self.__pages = pages
     self.__num_pages = len(pages)
     self.__filename = filename
-
      
     Beep.dispatch('new_file', self, self.__filename)
-
- 
 
   @property
   def pages(self):
       return self.__pages
   
-  def set_pages(self, pages):
+  def set_pages(self, pages, selected_item = None):
       self.__pages = pages
+      
   
   def get_page_by_id(self, id):
       id = int(id)
@@ -83,6 +82,7 @@ class MemPadModel:
   def set_page_title(self, id, title):
       p = self.__pages[id] 
       p["title"] = title   
+
   def export_to_html(self,filename = None):
     "write to html"  
     
@@ -117,6 +117,10 @@ class MemPadModel:
   def num_pages(self):
       return self.__num_pages
 
+  @property
+  def current_page(self):
+      return self.__current_page
+  
   @staticmethod
   def __readFile(filename) :
     "read file"  
@@ -125,19 +129,61 @@ class MemPadModel:
     f.close()  
     return str
 
-  def ___add_page(self, parent_id, level_increment):
-      parent_page = None
-      for page in self.pages:
-          if page.id == parent_id:
-              parent_page = page
-              break
-      
-      new_id = max(page.id for page in self.pages) + 1
-      new_level = parent_page.level + level_increment if parent_page else 0
-      new_page = Page(new_id, new_level, f"New Page {new_id}", f"Content of New Page {new_id}")
-      self.pages.append(new_page)
-      return new_page
+ 
 
+  def add_page_child(self, parent_id, title):
+      found = False
+      new_pages = []
+
+      for page in self.pages:
+        new_pages.append({
+          "id": len(new_pages), 
+          "level": page['level'], 
+          "title": page['title'], 
+          "content": page['content']})
+        
+        if page['id'] == parent_id:
+          found = True
+          self.__current_page = len(new_pages)
+          new_pages.append({
+          "id": len(new_pages), 
+          "level": page['level'] + 1, 
+          "title": title, 
+          "content": ''})
+               
+      if found:
+        self.__pages = new_pages
+
+      return found
+  
+  def _______add_page_after(self, page_id, title):
+    found = False
+    page_level = 0
+    added = False
+    new_pages = []
+
+    for page in self.pages:
+      new_pages.append({
+        "id": len(new_pages), 
+        "level": page['level'], 
+        "title": page['title'], 
+        "content": page['content']})
+      
+      if page['id'] == id:
+        found = True
+        page_level = page['level']
+
+        new_pages.append({
+        "id": len(new_pages), 
+        "level": page['level'] + 1, 
+        "title": title, 
+        "content": ''})
+              
+    if found:
+      self.__pages = new_pages
+
+    return found
+  
   def delete_page(self, page_id):
       self.__pages = [page for page in self.__pages if page["id"] != page_id]
 
