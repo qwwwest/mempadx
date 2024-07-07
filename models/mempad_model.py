@@ -1,29 +1,42 @@
 
 import markdown
 import os
+import re
 
 from beep import Beep
 
 class MemPadModel:
     
   def __init__(self):
+    self._reset()
+
+  def _reset(self):
+     
     self.__pages = []
     self.__num_pages = 0
     self.__current_page = 0
     self.__filename = ''
+    self.__dir = ''
    
   def open(self, filename):
-    "read lst mempad file"   
+    "read lst mempad file" 
+    if self.__filename:
+       self.save()  
+
     self.__dir = os.path.dirname(os.path.realpath(__file__))
-    str = MemPadModel.__readFile(filename)
+    mempad_str = MemPadModel.__readFile(filename)
   
-    if not str.startswith('MeMpAd.'):
+    if not mempad_str.startswith('MeMpAd.'):
       import sys
-      sys.exit(filename + ' is NOT a Mempad file.')
+      sys.exit(filename + ' is NOT a UTF8 Mempad file.')
+
+    index = mempad_str.index('\0')
   
-    index = str.index('\1')
-    str = str[index:].rstrip('\0')
-    arr = str.split('\0')
+    self.__current_page = int(mempad_str[7:index]) if (index > 7) else 0
+    
+    index = mempad_str.index('\1')
+    mempad_str = mempad_str[index:].rstrip('\0')
+    arr = mempad_str.split('\0')
 
     pages = []
     
@@ -47,6 +60,11 @@ class MemPadModel:
      
     Beep.dispatch('new_file', self, self.__filename)
 
+
+  @property
+  def filename(self):
+      return self.__filename
+  
   @property
   def pages(self):
       return self.__pages
@@ -120,14 +138,18 @@ class MemPadModel:
   @property
   def current_page(self):
       return self.__current_page
+ 
+  @current_page.setter
+  def current_page(self, val):
+      self.__current_page = val
   
   @staticmethod
   def __readFile(filename) :
     "read file"  
     f = open(filename, 'r', encoding='utf-8')
-    str = f.read()
+    data = f.read()
     f.close()  
-    return str
+    return data
 
  
 
@@ -183,8 +205,58 @@ class MemPadModel:
       self.__pages = new_pages
 
     return found
-  
-  def delete_page(self, page_id):
-      self.__pages = [page for page in self.__pages if page["id"] != page_id]
+
+  def save(self, filename = None):
+      
+    if filename == None :
+        filename = self.__filename
+    
+    if filename == None :
+        return
+
+
+    "write lst mempad file"   
+    self.__dir = os.path.dirname(os.path.realpath(__file__))
+    mempad = 'MeMpAd.' + str(self.__current_page) + '\0\0'
+         
+    for page in self.__pages:
+      mempad += chr(page['level']) + page['title'] + chr(0) + page['content'] + chr(0)
+
+    mempad += chr(0)  
+
+
+
+    print(filename + ' saved')
+    f = open(filename, 'w', encoding='utf-8')
+    f.write(mempad)
+    f.close()
+     
+    Beep.dispatch('Model_file_is_saved', self, filename)
+
+  def close(self):
+    "Save and close lst mempad file"
+
+    self.save()
+    
+    self.__pages = []
+    self.__num_pages = 0
+    self.__current_page = 0
+    self.__filename = ''
+    self.__dir = ''
+
 
  
+  def new_mempad_file(self, filename = None):
+      
+    self.__filename = filename
+    self.__dir = os.path.dirname(os.path.realpath(__file__))
+
+    mempad = 'MeMpAd.0\0\0'     
+    mempad += chr(1) + "New Page" + chr(0) + "" + chr(0)
+    mempad += chr(0)  
+ 
+    f = open(filename, 'w', encoding='utf-8')
+    f.write(mempad)
+    f.close()
+     
+    Beep.dispatch('Model_new_mempad_file_saved', self, filename)

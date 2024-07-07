@@ -2,6 +2,11 @@
 
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import Text, filedialog, messagebox
+from datetime import datetime
+import shutil
+from tkinterdnd2 import DND_FILES
+
 from models.mempad_model import MemPadModel
 from views.main_view import MainView
 
@@ -19,7 +24,7 @@ class MainController:
         Beep.listen('tree-has-changed',self.tree_has_changed)
         # Beep.dispatch('page-title-has-changed',page_id, current_title, new_title)
         Beep.listen('page-title-has-changed',self.page_title_has_changed)
-        Beep.listen('add_page_child',self.add_page)
+        Beep.listen('add_page_child', self.add_page)
         #Beep.listen('add_page_after',self.add_page)
         #Beep.listen('add_page_before',self.add_page)
  
@@ -34,13 +39,44 @@ class MainController:
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-light')
 
- 
         # Bind treeview selection
         self.view.treeview.tree.bind("<<TreeviewSelect>>", self.on_treeview_select)
 
         self.view.textarea.text.event_add( '<<REACT>>', *( '<Motion>', '<ButtonRelease>', '<KeyPress>', '<KeyRelease>' ) )
         b = self.view.textarea.text.bind( '<<REACT>>', self.footer_info )
         self.footer_info( ) # first time
+
+        self.view.bind("<Escape>", self.window_exit)
+        self.view.bind("<Control-s>", self.save)
+        self.view.protocol("WM_DELETE_WINDOW", self.window_exit)
+
+        self.view.drop_target_register(DND_FILES)
+        self.view.dnd_bind('<<Drop>>', self.on_drop_file)
+
+    def on_drop_file(self, event):
+        file_path = event.data.strip('{}')
+        print('file_path=',file_path)
+        if file_path:
+            self.open(file_path)
+
+
+    def window_exit(self, *args):
+        # YYYY-MM-DD_HourMinuteSecond for Backup:
+        # stamp = datetime.today().strftime('%Y-%m-%d_%H%M%S') 
+        # file_bak = self.model.filename[0:-4] + '_' + stamp + '.lst'
+        # self.save(file_bak)
+
+        self.save()
+        self.view.destroy()
+        print("bye.")
+
+       
+
+     
+    
+        
+        
+ 
  
     def footer_info(self, ev = None ):
             
@@ -60,24 +96,26 @@ class MainController:
              
 
     def open(self, file):
+        "open new file"
+        # backup file
+        shutil.copyfile(file, file + '.bak')
         self.model.open(file)
-        self.populate_tree()
+        self.populate_tree(self.model.current_page)
         self.view.title('Mempad - '+file)
 
     def populate_tree(self, idsel = 0):
+
         parents = [""]
         tree = self.view.treeview.tree
-
-        #idsel = self.new_selected_item
-       
+  
         # we clean up the old tree
         for item in tree.get_children():
             tree.delete(item)    
         snode = None
-        for id, p in enumerate(self.model.pages) :
+        for idx, p in enumerate(self.model.pages) :
             parents = parents[0:p["level"]]
             node = self.view.treeview.tree.insert(parents[p["level"]-1], "end", values=(p["id"],p["level"]), text=p["title"], open=True)
-            if p["id"] == idsel:
+            if idx == idsel:
                 snode = node
             parents.insert(p["level"], node)
 
@@ -123,11 +161,22 @@ class MainController:
         # after changing content, we reset the undo/redo stack
         self.view.textarea.text.edit_reset() 
         self.last_selected_item = new_selected_item
-        
-  
 
-    def save(self):
-        self.model.save()
+    def save(self, filename = None):
+
+        tree = self.view.treeview.tree
+
+
+
+        selected_item = tree.selection()[0]
+           
+        id = self.view.treeview.get_item_mid(selected_item)
+   
+        view_content = self.view.textarea.content
+        self.model.set_content_by_id(id, view_content)
+        self.model.current_page = id
+
+        self.model.save(filename)
 
     def ________________select_page(self, page):
         self.model.current_page = page
@@ -153,7 +202,6 @@ class MainController:
 
     def tree_has_changed(self, *args):
        
-      
         tree = self.view.treeview.tree
         selected = self.view.treeview.get_selected_item()
        
