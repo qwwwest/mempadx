@@ -2,7 +2,6 @@
 
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import Text, filedialog, messagebox
 from datetime import datetime
 import shutil
 from tkinterdnd2 import DND_FILES
@@ -27,6 +26,7 @@ class MainController:
         Beep.listen('add_page_child', self.add_page)
         #Beep.listen('add_page_after',self.add_page)
         #Beep.listen('add_page_before',self.add_page)
+        Beep.listen('command', self.run_command)
  
     
     def init_view(self, View):
@@ -246,4 +246,18 @@ class MainController:
 
             self.walk_tree(self.view.treeview.tree.get_children(child), level + 1, pages) 
         
-             
+
+    def run_command(self, message, command, *args ):  
+        
+        match command:
+            case 'open_mempad_file':
+                self.open(args[0])
+            case 'close_mempad_file':
+                self.close()
+            case 'save_mempad_file':
+                self.save()
+            case 'save_as_mempad_file':
+                self.save_as(args[0])
+
+            case _:
+                print ("command not found", command, args)
