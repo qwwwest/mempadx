@@ -2,6 +2,10 @@
 
 import tkinter as tk
 import tkinter.ttk as ttk
+<<<<<<< HEAD
+=======
+from tkinter import Text, filedialog, messagebox
+>>>>>>> 6f1f7e71a8918e29a0d7157fff0f66eb7a97919e
 from datetime import datetime
 import shutil
 from tkinterdnd2 import DND_FILES
