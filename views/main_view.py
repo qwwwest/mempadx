@@ -6,11 +6,10 @@ from views.toolbar_view import ToolbarView
 from views.treeview_view import TreeView
 from views.textarea_view import TextAreaView
 from views.footer_view import FooterView
+from tkinterdnd2 import DND_FILES, TkinterDnD
 import os
 
- 
-
-class MainView(tk.Tk):
+class MainView(TkinterDnD.Tk):
    
     def __init__(self, controller):
         dirname = os.path.dirname(os.path.realpath(__file__))
@@ -54,8 +53,11 @@ class MainView(tk.Tk):
 
         self.width = 0
         self.height = 0
+
         
-        self.bind("<Control-s>", self.save)
+        #Make the window jump above all
+        # self.attributes('-topmost',True)
+
         # self.bind("<Configure>", self.on_window_resize)
  
 
@@ -77,7 +79,4 @@ class MainView(tk.Tk):
         fh = self.footer.label.winfo_height()
         self.paned_window.winfo_height
     
-
-
-    def save(self, event=None):
-        self.controller.save()
+ 
