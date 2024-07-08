@@ -22,13 +22,18 @@ class MemPadModel:
     "read lst mempad file" 
     if self.__filename:
        self.save()  
-
+    
+    if not os.path.isfile(filename):
+       Beep.dispatch('alert', "info",  f"File {filename} NOT found.")
+       return False
+    
     self.__dir = os.path.dirname(os.path.realpath(__file__))
     mempad_str = MemPadModel.__readFile(filename)
   
     if not mempad_str.startswith('MeMpAd.'):
-      import sys
-      sys.exit(filename + ' is NOT a UTF8 Mempad file.')
+      Beep.dispatch('alert', "warning",  f"File {filename} is NOT a UTF8 Mempad file")
+      return False
+ 
 
     index = mempad_str.index('\0')
   
@@ -59,6 +64,7 @@ class MemPadModel:
     self.__filename = filename
      
     Beep.dispatch('new_file', self, self.__filename)
+    return True
 
 
   @property
@@ -146,7 +152,7 @@ class MemPadModel:
   @staticmethod
   def __readFile(filename) :
     "read file"  
-    f = open(filename, 'r', encoding='utf-8')
+    f = open(filename, 'r', encoding='utf-8',  errors='ignore')
     data = f.read()
     f.close()  
     return data

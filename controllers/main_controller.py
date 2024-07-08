@@ -2,40 +2,40 @@
 
 import tkinter as tk
 import tkinter.ttk as ttk
-<<<<<<< HEAD
-=======
-from tkinter import Text, filedialog, messagebox
->>>>>>> 6f1f7e71a8918e29a0d7157fff0f66eb7a97919e
 from datetime import datetime
+import configparser
 import shutil
 from tkinterdnd2 import DND_FILES
 
 from models.mempad_model import MemPadModel
 from views.main_view import MainView
+from tkinter.messagebox import showinfo
+
 
 from beep import Beep
 
 class MainController:
 
-    def __init__(self):
+    def __init__(self, conf):
         self.model = MemPadModel()
+        self.conf = conf
          
         #Beep.listen('model_new_file', self.info )
         self.current_page = None
         self.last_selected_item = None
 
-        Beep.listen('tree-has-changed',self.tree_has_changed)
-        # Beep.dispatch('page-title-has-changed',page_id, current_title, new_title)
-        Beep.listen('page-title-has-changed',self.page_title_has_changed)
+        Beep.listen('tree-has-changed', self.tree_has_changed)
+        Beep.listen('page-title-has-changed', self.page_title_has_changed)
         Beep.listen('add_page_child', self.add_page)
-        #Beep.listen('add_page_after',self.add_page)
-        #Beep.listen('add_page_before',self.add_page)
+        Beep.listen('alert', self.alert)
+
+        # run command in menus bar (File, Settings...)
         Beep.listen('command', self.run_command)
  
     
     def init_view(self, View):
  
-        self.view = View(self)
+        self.view = View(self, self.conf)
 
         # Import the tcl file
         self.view.tk.call('source', '/www/py/mempad/views/themes/Forest-ttk-theme/forest-light.tcl')
@@ -70,17 +70,11 @@ class MainController:
         # file_bak = self.model.filename[0:-4] + '_' + stamp + '.lst'
         # self.save(file_bak)
 
+        self.conf.set('Main', 'MRU', self.model.filename)
         self.save()
         self.view.destroy()
         print("bye.")
 
-       
-
-     
-    
-        
-        
- 
  
     def footer_info(self, ev = None ):
             
@@ -99,11 +93,20 @@ class MainController:
         self.view.footer.setText(f'{r},{c} {count}')
              
 
+    def alert(self, _ , icon , message ):
+        "open dialog to show Info"
+        showinfo ( message = message , icon = icon, title = icon.upper() )
+        # backup file
+
     def open(self, file):
         "open new file"
         # backup file
+
+
+        if not self.model.open(file):
+           return
+        
         shutil.copyfile(file, file + '.bak')
-        self.model.open(file)
         self.populate_tree(self.model.current_page)
         self.view.title('Mempad - '+file)
 
@@ -170,8 +173,10 @@ class MainController:
 
         tree = self.view.treeview.tree
 
+        if self.model.num_pages == 0:
+            return
 
-
+        print("self.model.num_pages" , self.model.num_pages )
         selected_item = tree.selection()[0]
            
         id = self.view.treeview.get_item_mid(selected_item)
@@ -262,6 +267,5 @@ class MainController:
                 self.save()
             case 'save_as_mempad_file':
                 self.save_as(args[0])
-
             case _:
                 print ("command not found", command, args)

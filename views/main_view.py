@@ -11,9 +11,11 @@ import os
 
 class MainView(TkinterDnD.Tk):
    
-    def __init__(self, controller):
+    def __init__(self, controller, conf):
         dirname = os.path.dirname(os.path.realpath(__file__))
         super().__init__()
+
+        self.conf = conf
  
 
         # Creating object of photoimage class for window icons
@@ -27,9 +29,28 @@ class MainView(TkinterDnD.Tk):
         # Setting icon of master window 
         self.iconphoto(False, self.ikon) 
 
-        self.geometry("800x400")
+
+        WinWidth = self.conf.getint('Main', 'WinWidth')
+        WinHeight = self.conf.getint('Main', 'WinHeight')
+        winX = self.conf.getint('Main','winX')
+        winY = self.conf.getint('Main','winY')
+
         self.minsize(480,320)
+ 
+        # width of the screen
+        screenwidth = self.winfo_screenwidth() 
+        # height of the screen
+        screenheight = self.winfo_screenheight() 
         
+        # print(f"{WinWidth}x{WinHeight}+{winX}+{winY} {WinWidth + winX}>{screenwidth} OR {WinWidth + winY}>{hs}")
+
+        if WinWidth + winX > screenwidth or WinHeight + winY > screenheight:
+            geom ="640x480+0+0"
+        else:    
+            geom = f"{WinWidth}x{WinHeight}+{winX}+{winY}"
+        
+        print(geom)
+        self.geometry(geom)
         self.menu = MenuView(self)
 
        #  self.toolbar = ToolbarView(self)
@@ -58,7 +79,7 @@ class MainView(TkinterDnD.Tk):
         #Make the window jump above all
         # self.attributes('-topmost',True)
 
-        # self.bind("<Configure>", self.on_window_resize)
+        self.bind("<Configure>", self.on_window_resize)
  
 
 
@@ -69,13 +90,18 @@ class MainView(TkinterDnD.Tk):
         if widget != '.':
            return
         
-        if (self.width == event.width and
-            self.height == event.height):
-            return
-        
+        # if (self.width == event.width and
+        #     self.height == event.height):
+        #     return
+ 
         self.width = event.width
         self.height = event.height
-
+ 
+        self.conf.set('Main', 'WinWidth', str(event.width))
+        self.conf.set('Main', 'WinHeight',str(event.height))
+        self.conf.set('Main', 'winX', str(self.winfo_x()))
+        self.conf.set('Main', 'winY', str(self.winfo_y()))
+ 
         fh = self.footer.label.winfo_height()
         self.paned_window.winfo_height
     
