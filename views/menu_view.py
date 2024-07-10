@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 from beep import Beep
+import os.path
 
 
 class MenuView(tk.Menu):
@@ -80,7 +81,7 @@ class MenuView(tk.Menu):
         )
         settings_menu.add_cascade(menu=theme_menu, label="Theme")
 
-        self.add_cascade(label="Settings", menu=settings_menu)
+       # self.add_cascade(label="Settings", menu=settings_menu)
 
         # self.add_cascade(label="Page", menu=page_menu)
         # self.add_cascade(label="Export", menu=export_menu)
@@ -114,7 +115,7 @@ class MenuView(tk.Menu):
     
     def add_open_mempad_file_item(self, file, add_first = False):
         
-        if not file in self.latestFiles:
+        if not file in self.latestFiles and os.path.isfile(file):
          
             self.mempad_menu.add_radiobutton(
                 label=file,
