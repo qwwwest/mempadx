@@ -35,7 +35,7 @@ class MemPadModel:
     self.__current_page = int(mempad_str[7:index]) if (index > 7) else 0
     
     index = mempad_str.index('\1')
-    mempad_str = mempad_str[index:] #.rstrip('\0')
+    mempad_str = mempad_str[index:-1] # remove last ZERO '\0'
     arr = mempad_str.split('\0')
 
     pages = []

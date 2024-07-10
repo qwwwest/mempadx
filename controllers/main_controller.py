@@ -29,6 +29,7 @@ class MainController:
         Beep.listen('add_page_child', self.add_page)
         Beep.listen('alert', self.alert)
         Beep.listen('info', self.info)
+      
 
         # run command in menus bar (File, Settings...)
         Beep.listen('command', self.run_command)
@@ -269,7 +270,10 @@ class MainController:
         
         if command != 'command' :
             print('command ERROR', command)
-        match action:
+        match action:           
+            case 'exit':
+                self.window_exit()
+                return
             case 'open_mempad_file':
                 print ("action = ", action, *args)
                 self.open(args[0])
