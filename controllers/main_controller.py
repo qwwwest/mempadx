@@ -3,13 +3,13 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from datetime import datetime
-import configparser
 import shutil
 from tkinterdnd2 import DND_FILES
-
+from tkinter.messagebox import askyesno
 from models.mempad_model import MemPadModel
 from views.main_view import MainView
 from tkinter.messagebox import showinfo
+import os.path
 
 
 from beep import Beep
@@ -28,6 +28,7 @@ class MainController:
         Beep.listen('page-title-has-changed', self.page_title_has_changed)
         Beep.listen('add_page_child', self.add_page)
         Beep.listen('alert', self.alert)
+        Beep.listen('info', self.info)
 
         # run command in menus bar (File, Settings...)
         Beep.listen('command', self.run_command)
@@ -51,7 +52,9 @@ class MainController:
         self.footer_info( ) # first time
 
         self.view.bind("<Escape>", self.window_exit)
-        self.view.bind("<Control-s>", self.save)
+        self.view.bind("<Control-s>", lambda e: self.save())
+        self.view.bind("<Control-o>", lambda e:self.view.menu.open_file_dialog())
+        self.view.bind("<Control-n>", lambda e:self.view.menu.save_new_file_dialog())
         self.view.protocol("WM_DELETE_WINDOW", self.window_exit)
 
         self.view.drop_target_register(DND_FILES)
@@ -59,7 +62,7 @@ class MainController:
 
     def on_drop_file(self, event):
         file_path = event.data.strip('{}')
-        print('file_path=',file_path)
+        
         if file_path:
             self.open(file_path)
 
@@ -96,19 +99,24 @@ class MainController:
     def alert(self, _ , icon , message ):
         "open dialog to show Info"
         showinfo ( message = message , icon = icon, title = icon.upper() )
-        # backup file
+ 
+    def info(self, _ , message ):
+        "open dialog to show Info"
+        self.view.footer.setText(message)
+ 
 
     def open(self, file):
         "open new file"
         # backup file
 
-
+        self.save()
         if not self.model.open(file):
            return
-        
+      
         shutil.copyfile(file, file + '.bak')
         self.populate_tree(self.model.current_page)
         self.view.title('Mempad - '+file)
+        self.view.menu.add_open_mempad_file_item(file, False)
 
     def populate_tree(self, idsel = 0):
 
@@ -145,7 +153,7 @@ class MainController:
        
         id = self.view.treeview.get_item_mid(new_selected_item)
 
-        if self.last_selected_item == new_selected_item:
+        if self.last_selected_item == new_selected_item :
             # tree.selection_set(self.last_selected_item)
             return
         
@@ -173,10 +181,12 @@ class MainController:
 
         tree = self.view.treeview.tree
 
-        if self.model.num_pages == 0:
+        if self.model.num_pages == 0 :
+            if self.model.filename != '':
+                print(f"Empty model. Cannot save '{self.model.filename}'")
             return
 
-        print("self.model.num_pages" , self.model.num_pages )
+       
         selected_item = tree.selection()[0]
            
         id = self.view.treeview.get_item_mid(selected_item)
@@ -184,7 +194,6 @@ class MainController:
         view_content = self.view.textarea.content
         self.model.set_content_by_id(id, view_content)
         self.model.current_page = id
-
         self.model.save(filename)
 
     def ________________select_page(self, page):
@@ -256,16 +265,33 @@ class MainController:
             self.walk_tree(self.view.treeview.tree.get_children(child), level + 1, pages) 
         
 
-    def run_command(self, message, command, *args ):  
+    def run_command(self, command, action, *args ):  
         
-        match command:
+        if command != 'command' :
+            print('command ERROR', command)
+        match action:
             case 'open_mempad_file':
+                print ("action = ", action, *args)
                 self.open(args[0])
+                return
             case 'close_mempad_file':
                 self.close()
+                return
             case 'save_mempad_file':
                 self.save()
+                return
             case 'save_as_mempad_file':
-                self.save_as(args[0])
+                print ('save_as_mempad_file args[0]=', args[0])
+                self.save(args[0])
+                self.open(args[0])
+                return            
+            case 'save_as_new_mempad_file':
+                if os.path.isfile(args[0]):
+                    self.alert('','info', 'File already exist : \n' + args[0])
+                    return
+                self.save()
+                self.model.new_mempad_file(args[0])
+                self.open(args[0])
+                return
             case _:
-                print ("command not found", command, args)
+                print ("command not found", action, *args)

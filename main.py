@@ -7,7 +7,7 @@ import configparser
 
 
 
-def main(file):
+def main():
 
     conf = configparser.ConfigParser(default_section = "Main", allow_no_value=True ) 
     conf.optionxform = lambda option: option
@@ -26,7 +26,7 @@ def main(file):
 
 
 if __name__ == "__main__":
-    main("mempad.lst")
+    main()
 
 
 

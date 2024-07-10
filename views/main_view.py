@@ -30,31 +30,30 @@ class MainView(TkinterDnD.Tk):
         self.iconphoto(False, self.ikon) 
 
 
-        WinWidth = self.conf.getint('Main', 'WinWidth')
-        WinHeight = self.conf.getint('Main', 'WinHeight')
+        winWidth = self.conf.getint('Main', 'WinWidth')
+        winHeight = self.conf.getint('Main', 'WinHeight') + 20
         winX = self.conf.getint('Main','winX')
         winY = self.conf.getint('Main','winY')
+        iwidth = self.conf.getint('Main','Iwidth')
+
 
         self.minsize(480,320)
  
-        # width of the screen
         screenwidth = self.winfo_screenwidth() 
-        # height of the screen
         screenheight = self.winfo_screenheight() 
-        
-        # print(f"{WinWidth}x{WinHeight}+{winX}+{winY} {WinWidth + winX}>{screenwidth} OR {WinWidth + winY}>{hs}")
 
-        if WinWidth + winX > screenwidth or WinHeight + winY > screenheight:
+        if winWidth + winX > screenwidth or winHeight + winY > screenheight:
             geom ="640x480+0+0"
         else:    
-            geom = f"{WinWidth}x{WinHeight}+{winX}+{winY}"
-        
-        print(geom)
+            geom = f"{winWidth}x{winHeight}+{winX}+{winY}"
+ 
         self.geometry(geom)
+        # self.attributes('-fullscreen', True)
+        # self.state('zoomed') 
         self.menu = MenuView(self)
 
-       #  self.toolbar = ToolbarView(self)
-      #  self.toolbar.pack(side=tk.TOP, fill=tk.X)
+        #  self.toolbar = ToolbarView(self)
+        #  self.toolbar.pack(side=tk.TOP, fill=tk.X)
 
         # Initialize the footer
         self.footer = FooterView(self)
@@ -66,7 +65,10 @@ class MainView(TkinterDnD.Tk):
         
         # Initialize the treeview
         self.treeview = TreeView(self.paned_window,controller)
-        self.paned_window.add(self.treeview, stretch="always")
+        #self.paned_window.add(self.treeview, stretch="always")
+        self.paned_window.add(self.treeview, width=iwidth)
+
+        # self.after(50, lambda: self.win.sashpos(0, position))
 
         # Initialize the text area
         self.textarea = TextAreaView(self.paned_window)
@@ -86,23 +88,27 @@ class MainView(TkinterDnD.Tk):
     def on_window_resize(self, event):
         widget =  str(event.widget)
 
-        # only main window
-        if widget != '.':
-           return
         
-        # if (self.width == event.width and
-        #     self.height == event.height):
-        #     return
+        if widget == '.':
  
-        self.width = event.width
-        self.height = event.height
+    
+            self.width = winWidth = event.width
+            self.height = winHeight = event.height 
+            winX, winY = self.winfo_x(), self.winfo_y()
  
-        self.conf.set('Main', 'WinWidth', str(event.width))
-        self.conf.set('Main', 'WinHeight',str(event.height))
-        self.conf.set('Main', 'winX', str(self.winfo_x()))
-        self.conf.set('Main', 'winY', str(self.winfo_y()))
+
+            self.conf.set('Main', 'WinWidth', str(winWidth))
+            self.conf.set('Main', 'WinHeight',str(winHeight))
+            self.conf.set('Main', 'winX', str(winX))
+            self.conf.set('Main', 'winY', str(winY))
  
-        fh = self.footer.label.winfo_height()
-        self.paned_window.winfo_height
+            self.footer.label['text'] = f"X={winX}, Y={winY} Window: {winWidth}x{winHeight} [{self.winfo_screenwidth()}x{self.winfo_screenheight() }]"
+            return
+        
+        if widget == '.!panedwindow.!treeview':
+          
+            self.conf.set('Main', 'Iwidth', str( event.width))
+            return
+        
     
  

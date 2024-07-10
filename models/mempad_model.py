@@ -13,34 +13,29 @@ class MemPadModel:
   def _reset(self):
      
     self.__pages = []
-    self.__num_pages = 0
     self.__current_page = 0
     self.__filename = ''
     self.__dir = ''
    
   def open(self, filename):
     "read lst mempad file" 
-    if self.__filename:
-       self.save()  
     
     if not os.path.isfile(filename):
        Beep.dispatch('alert', "info",  f"File {filename} NOT found.")
        return False
     
     self.__dir = os.path.dirname(os.path.realpath(__file__))
-    mempad_str = MemPadModel.__readFile(filename)
-  
-    if not mempad_str.startswith('MeMpAd.'):
-      Beep.dispatch('alert', "warning",  f"File {filename} is NOT a UTF8 Mempad file")
-      return False
- 
+    mempad_str = self._read_mempad_file(filename)
 
+    if not mempad_str:
+       return False
+ 
     index = mempad_str.index('\0')
   
     self.__current_page = int(mempad_str[7:index]) if (index > 7) else 0
     
     index = mempad_str.index('\1')
-    mempad_str = mempad_str[index:].rstrip('\0')
+    mempad_str = mempad_str[index:] #.rstrip('\0')
     arr = mempad_str.split('\0')
 
     pages = []
@@ -48,6 +43,8 @@ class MemPadModel:
      
     for i, item in enumerate(arr):
       if i & 1 == 0 : # titles
+        if item == '':
+           break
         level = ord(item[0])
         title = item[1:]
       else:
@@ -60,7 +57,6 @@ class MemPadModel:
       
       
     self.__pages = pages
-    self.__num_pages = len(pages)
     self.__filename = filename
      
     Beep.dispatch('new_file', self, self.__filename)
@@ -135,11 +131,12 @@ class MemPadModel:
     f.write(html)
     f.close()
     
-  def get_data(self):
+  def ________get_data(self):
       return str(self.__num_pages) + ' pages'
+  
   @property
   def num_pages(self):
-      return self.__num_pages
+      return len(self.__pages)
 
   @property
   def current_page(self):
@@ -149,13 +146,24 @@ class MemPadModel:
   def current_page(self, val):
       self.__current_page = val
   
-  @staticmethod
-  def __readFile(filename) :
-    "read file"  
-    f = open(filename, 'r', encoding='utf-8',  errors='ignore')
-    data = f.read()
-    f.close()  
-    return data
+  def _read_mempad_file(self, filename) :
+ 
+    # f = open(filename, 'r', encoding='utf-8',  errors='ignore')
+    try:
+      with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
+        start7 = f.read(7)
+        if start7 != 'MeMpAd.':
+          raise ValueError( f"File {filename} is not a Mempad file")
+        f.close()
+
+      with open(filename, 'r', encoding='utf-8') as f:
+        data = f.read()
+        f.close()  
+      return data
+    except Exception as e:
+      Beep.dispatch('alert', "error", str(e))
+      return False
+
 
  
 
@@ -220,7 +228,7 @@ class MemPadModel:
     if filename == None :
         return
 
-
+    print('saving...', filename)
     "write lst mempad file"   
     self.__dir = os.path.dirname(os.path.realpath(__file__))
     mempad = 'MeMpAd.' + str(self.__current_page) + '\0\0'
@@ -230,14 +238,16 @@ class MemPadModel:
 
     mempad += chr(0)  
 
-
-
-    print(filename + ' saved')
-    f = open(filename, 'w', encoding='utf-8')
-    f.write(mempad)
-    f.close()
-     
-    Beep.dispatch('Model_file_is_saved', self, filename)
+    try:
+      f = open(filename, 'w', encoding='utf-8')
+      f.write(mempad)
+      f.close()
+    except:
+      Beep.dispatch('alert', "error", f"Cannot save: {filename}")
+      return False
+    
+    Beep.dispatch('info', f"{filename} was saved")
+    return True
 
   def close(self):
     "Save and close lst mempad file"
@@ -254,15 +264,19 @@ class MemPadModel:
  
   def new_mempad_file(self, filename = None):
       
-    self.__filename = filename
-    self.__dir = os.path.dirname(os.path.realpath(__file__))
+    # self.__filename = filename
+    # self.__dir = os.path.dirname(os.path.realpath(__file__))
 
-    mempad = 'MeMpAd.0\0\0'     
-    mempad += chr(1) + "New Page" + chr(0) + "" + chr(0)
-    mempad += chr(0)  
- 
-    f = open(filename, 'w', encoding='utf-8')
-    f.write(mempad)
-    f.close()
-     
-    Beep.dispatch('Model_new_mempad_file_saved', self, filename)
+    mempad = 'MeMpAd.0\0\0\1New Page\0\0'    
+    # mempad += chr(1) + "New Page" + chr(0) + "" + chr(0)
+    # mempad += chr(0)  
+    try:
+      f = open(filename, 'w', encoding='utf-8')
+      f.write(mempad)
+      f.close()
+      Beep.dispatch('Model_new_mempad_file_saved', self, filename)
+      return True
+    except Exception as e:
+    
+      Beep.dispatch('alert', "error", str(e)) 
+      return False
