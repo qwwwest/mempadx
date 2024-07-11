@@ -136,4 +136,7 @@ class MenuView(tk.Menu):
         for i, latest_file in enumerate(self.latestFiles):
             if file == latest_file:
                 self.open_file.set(i)
-        
+            #     self.mempad_menu.entryconfigure(i,state="disabled")
+            # else 
+            #     self.mempad_menu.entryconfigure(i,state="enabled")
+        #self.mempad_menu.entryconfigure(self.open_file.get(),state="disabled")

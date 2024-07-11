@@ -117,7 +117,7 @@ class MainController:
         shutil.copyfile(file, file + '.bak')
         self.populate_tree(self.model.current_page)
         self.view.title('Mempad - '+file)
-        self.view.menu.add_open_mempad_file_item(file, False)
+        self.view.menu.add_open_mempad_file_item(file, True)
 
     def populate_tree(self, idsel = 0):
 
@@ -276,6 +276,8 @@ class MainController:
                 return
             case 'open_mempad_file':
                 print ("action = ", action, *args)
+                if self.model.filename == args[0]: 
+                    return
                 self.open(args[0])
                 return
             case 'close_mempad_file':
