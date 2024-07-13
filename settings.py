@@ -17,7 +17,6 @@ class MemPadSettings:
     def __init__(self):
         conf = configparser.ConfigParser(default_section = "Main", allow_no_value=True ) 
         conf.optionxform = lambda option: option
-        print ("READ SETTINGS.INI")
         conf.read("settings.ini") 
 
         self.conf = conf
@@ -50,15 +49,13 @@ class MemPadSettings:
                 self.tkVariables[name] = tk.IntVar()  
                 value = str(strval)
             else:
-                print('NOOPE type not found',name,  var_type)    
+                print('NOPE type not found',name,  var_type)    
             self.tkVariables[name].set(value)     
             self.types[name] = var_type     
         return self.tkVariables[name]
 
     def getValue(self, name, var_type = 'str'):
-        # if not name in self.tkVariables:
-        if(name == 'WinWidth'):
-            print('WinWidth INIIIIII',name,  var_type)  
+ 
         var = self.getVariable(name, var_type)
         return var.get()
       

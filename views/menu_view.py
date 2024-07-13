@@ -43,8 +43,8 @@ class MenuView(tk.Menu):
         
         self.add_cascade(label="File", menu=file_menu)
 
-        last_file = self.conf.getValue('MRU')
-        print(self.settings.getValue('MRU'))
+     
+ 
 
         # OnTop = 0
         # ExitEsc = 0
@@ -89,7 +89,7 @@ class MenuView(tk.Menu):
             command=lambda: self.cmd('settings','theme_changed', 2),
             
         )
-        settings_menu.add_cascade(menu=theme_menu, label="Theme")
+        # settings_menu.add_cascade(menu=theme_menu, label="Theme")
 
         self.add_cascade(label="Settings", menu=settings_menu)
 
