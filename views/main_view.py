@@ -24,17 +24,17 @@ class MainView(TkinterDnD.Tk):
         self.ikon = tk.PhotoImage(file = parentdir + '/ressources/python.png') 
 
         #self.model = model    
-        self.title("MemPad")
+        self.title("MemPadX")
 
         # Setting icon of master window 
         self.iconphoto(False, self.ikon) 
 
 
-        winWidth = self.conf.getint('Main', 'WinWidth')
-        winHeight = self.conf.getint('Main', 'WinHeight') + 20
-        winX = self.conf.getint('Main','winX')
-        winY = self.conf.getint('Main','winY')
-        iwidth = self.conf.getint('Main','Iwidth')
+        winWidth = self.conf.getValue('WinWidth', 'int')
+        winHeight = self.conf.getValue('WinHeight', 'int') + 20
+        winX = self.conf.getValue('winX', 'int')
+        winY = self.conf.getValue('winY', 'int')
+        iwidth = self.conf.getValue('Iwidth', 'int')
 
 
         self.minsize(480,320)
@@ -65,10 +65,8 @@ class MainView(TkinterDnD.Tk):
         
         # Initialize the treeview
         self.treeview = TreeView(self.paned_window,controller)
-        #self.paned_window.add(self.treeview, stretch="always")
         self.paned_window.add(self.treeview, width=iwidth)
 
-        # self.after(50, lambda: self.win.sashpos(0, position))
 
         # Initialize the text area
         self.textarea = TextAreaView(self.paned_window)
@@ -78,11 +76,14 @@ class MainView(TkinterDnD.Tk):
         self.height = 0
 
         
-        #Make the window jump above all
-        # self.attributes('-topmost',True)
+
 
         self.bind("<Configure>", self.on_window_resize)
  
+    def always_on_top(self, topmost):
+
+        #Make the window jump above all
+        self.attributes('-topmost',topmost)
 
 
     def on_window_resize(self, event):
@@ -97,17 +98,21 @@ class MainView(TkinterDnD.Tk):
             winX, winY = self.winfo_x(), self.winfo_y()
  
 
-            self.conf.set('Main', 'WinWidth', str(winWidth))
-            self.conf.set('Main', 'WinHeight',str(winHeight))
-            self.conf.set('Main', 'winX', str(winX))
-            self.conf.set('Main', 'winY', str(winY))
- 
+            # self.conf.setValue('WinWidth', str(winWidth))
+            # self.conf.setValue('WinHeight',str(winHeight))
+            # self.conf.setValue('winX', str(winX))
+            # self.conf.setValue('winY', str(winY))
+    
+            self.conf.setValue('WinWidth', winWidth)
+            self.conf.setValue('WinHeight',winHeight)
+            self.conf.setValue('winX', winX)
+            self.conf.setValue('winY', winY)
             self.footer.label['text'] = f"X={winX}, Y={winY} Window: {winWidth}x{winHeight} [{self.winfo_screenwidth()}x{self.winfo_screenheight() }]"
             return
         
         if widget == '.!panedwindow.!treeview':
           
-            self.conf.set('Main', 'Iwidth', str( event.width))
+            self.conf.setValue('Iwidth', event.width)
             return
         
     

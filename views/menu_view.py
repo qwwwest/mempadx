@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 from beep import Beep
+from settings import MemPadSettings
 import os.path
 
 
@@ -10,7 +11,7 @@ class MenuView(tk.Menu):
         super().__init__(parent)
         self.parent = parent
         self.conf = parent.conf
-
+        self.settings = MemPadSettings.get_instance()
         #self.latestFiles = 
 
         self.latestFiles = []
@@ -22,8 +23,8 @@ class MenuView(tk.Menu):
 
         self.open_file = tk.IntVar()
        
-        last_file = self.conf.get('Main','MRU')
-        for i,file in enumerate(self.conf.get('Main','LatestFiles').strip().split("\n")):
+        last_file = self.conf.getValue('MRU')
+        for i,file in enumerate(self.conf.getValue('LatestFiles').strip().split("\n")):
             
             self.add_open_mempad_file_item(file)
             if last_file == file:
@@ -40,29 +41,38 @@ class MenuView(tk.Menu):
         file_menu.add_command(label="Exit", accelerator="ESC", command= self.bindcmd('exit') )
  
         
- 
         self.add_cascade(label="File", menu=file_menu)
 
-        exit_on_esc = tk.BooleanVar()
+        last_file = self.conf.getValue('MRU')
+        print(self.settings.getValue('MRU'))
+
+        # OnTop = 0
+        # ExitEsc = 0
+        # AutoSave = 0
+        # NoBackup = 1
+
         settings_menu.add_checkbutton(
             label="Exit on ESC", 
-            command=lambda: self.cmd('settings','exit_on_esc', exit_on_esc),
-            variable=exit_on_esc
+            command= self.bindcmd('settings-update','ExitEsc'),
+            variable= self.conf.getVariable('ExitEsc', 'bool')
         )
-        auto_save = tk.BooleanVar()
+
         settings_menu.add_checkbutton(
             label="Auto Save", 
-            command=lambda: self.cmd('settings','auto_save', auto_save),
-            variable=auto_save
+            command= self.bindcmd('settings-update','AutoSave'),
+            variable= self.conf.getVariable('AutoSave', 'bool')
         )
-        always_on_top = tk.BooleanVar()
         settings_menu.add_checkbutton(
-            label="Always on top", 
-            command=lambda: self.cmd('settings','always_on_top', always_on_top),
-            variable=always_on_top
+            label="Always On Top", 
+            command= self.bindcmd('settings-update','OnTop'),
+            variable= self.conf.getVariable('OnTop', 'bool')
         )
-
-
+ 
+        settings_menu.add_checkbutton(
+            label="No BackUp", 
+            command= self.bindcmd('settings-update','NoBackup'),
+            variable= self.conf.getVariable('NoBackup', 'bool')
+        )
         theme_menu = tk.Menu(self, tearoff=False)
         theme = tk.IntVar()
         theme.set(1)  # Default theme ("Light".)
@@ -81,7 +91,7 @@ class MenuView(tk.Menu):
         )
         settings_menu.add_cascade(menu=theme_menu, label="Theme")
 
-       # self.add_cascade(label="Settings", menu=settings_menu)
+        self.add_cascade(label="Settings", menu=settings_menu)
 
         # self.add_cascade(label="Page", menu=page_menu)
         # self.add_cascade(label="Export", menu=export_menu)
@@ -130,7 +140,7 @@ class MenuView(tk.Menu):
                 self.latestFiles.append(file)
 
             conf_value = "\n".join(self.latestFiles)
-            self.conf.set('Main','LatestFiles', conf_value) 
+            self.conf.setValue('LatestFiles', conf_value) 
 
         # we update the menu checked item
         for i, latest_file in enumerate(self.latestFiles):

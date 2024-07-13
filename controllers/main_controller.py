@@ -10,9 +10,9 @@ from models.mempad_model import MemPadModel
 from views.main_view import MainView
 from tkinter.messagebox import showinfo
 import os.path
-
-
 from beep import Beep
+import threading
+import time
 
 class MainController:
 
@@ -31,6 +31,8 @@ class MainController:
         Beep.listen('info', self.info)
       
 
+
+
         # run command in menus bar (File, Settings...)
         Beep.listen('command', self.run_command)
  
@@ -47,13 +49,18 @@ class MainController:
 
         # Bind treeview selection
         self.view.treeview.tree.bind("<<TreeviewSelect>>", self.on_treeview_select)
+        self.view.treeview.tree.bind("<Double-Button-1>", self.on_treeview_select_click)
+        # self.view.treeview.tree.bind("<Button-3>", self.on_treeview_select)
 
         self.view.textarea.text.event_add( '<<REACT>>', *( '<Motion>', '<ButtonRelease>', '<KeyPress>', '<KeyRelease>' ) )
         b = self.view.textarea.text.bind( '<<REACT>>', self.footer_info )
         self.footer_info( ) # first time
 
-        self.view.bind("<Escape>", self.window_exit)
+        self.view.bind("<Escape>", self.on_escape)
         self.view.bind("<Control-s>", lambda e: self.save())
+        # save when app lose focus
+        # self.view.bind("<FocusOut>", lambda e: self.save())
+         
         self.view.bind("<Control-o>", lambda e:self.view.menu.open_file_dialog())
         self.view.bind("<Control-n>", lambda e:self.view.menu.save_new_file_dialog())
         self.view.protocol("WM_DELETE_WINDOW", self.window_exit)
@@ -61,20 +68,45 @@ class MainController:
         self.view.drop_target_register(DND_FILES)
         self.view.dnd_bind('<<Drop>>', self.on_drop_file)
 
+       
+        
+        self.set_autosave(self.conf.getValue('AutoSave'))
+ 
+                   
+
+    def set_autosave(self, state):
+        
+        if state :
+            self.timer_runs = threading.Event()
+            self.autosave_thread = threading.Thread(target=self.timer, args=(self.timer_runs,))
+            self.autosave_thread.start()
+        else: 
+            if hasattr(self, 'timer_runs') :
+                self.timer_runs.set()
+
+
     def on_drop_file(self, event):
         file_path = event.data.strip('{}')
         
         if file_path:
             self.open(file_path)
 
-
+    def on_escape(self, *args):
+        if self.conf.getValue('ExitEsc'):
+            self.window_exit()
+         
     def window_exit(self, *args):
         # YYYY-MM-DD_HourMinuteSecond for Backup:
         # stamp = datetime.today().strftime('%Y-%m-%d_%H%M%S') 
         # file_bak = self.model.filename[0:-4] + '_' + stamp + '.lst'
         # self.save(file_bak)
+        #self.timer_runs.clear()
 
-        self.conf.set('Main', 'MRU', self.model.filename)
+        # strop autosave Thread if running
+        if hasattr(self,'timer_runs') :
+            self.timer_runs.set()
+ 
+        self.conf.setValue('MRU', self.model.filename)
         self.save()
         self.view.destroy()
         print("bye.")
@@ -114,7 +146,8 @@ class MainController:
         if not self.model.open(file):
            return
       
-        shutil.copyfile(file, file + '.bak')
+        if self.conf.getValue('NoBackup') == False:
+            shutil.copyfile(file, file + '.bak')
         self.populate_tree(self.model.current_page)
         self.view.title('Mempad - '+file)
         self.view.menu.add_open_mempad_file_item(file, True)
@@ -139,10 +172,23 @@ class MainController:
             self.view.treeview.tree.selection_add(snode)
         self.last_selected_item = None
 
+    def on_treeview_select_click(self, event):
 
+        tree = self.view.treeview.tree
+        
+        if len(tree.selection()) == 0: 
+           return
+        new_selected_item = tree.selection()[0]
+        # click on already selected item to rename it
+        if self.last_selected_item == new_selected_item :
+             
+            # tree.selection_set(self.last_selected_item)
+            self.view.treeview.rename_item()
+            return
 
     def on_treeview_select(self, event):
        
+        
         tree = self.view.treeview.tree
         
         if len(tree.selection()) == 0: 
@@ -155,7 +201,7 @@ class MainController:
         id = self.view.treeview.get_item_mid(new_selected_item)
 
         if self.last_selected_item == new_selected_item :
-            # tree.selection_set(self.last_selected_item)
+ 
             return
         
         if self.last_selected_item:
@@ -265,6 +311,8 @@ class MainController:
 
             self.walk_tree(self.view.treeview.tree.get_children(child), level + 1, pages) 
         
+ 
+
 
     def run_command(self, command, action, *args ):  
         
@@ -299,5 +347,28 @@ class MainController:
                 self.model.new_mempad_file(args[0])
                 self.open(args[0])
                 return
+            case 'settings-update':
+                self.conf.hasChanged(args[0])
+                if args[0] == 'OnTop':
+                   self.view.always_on_top(self.conf.getValue(args[0]))
+                if args[0] == 'AutoSave':
+                   self.set_autosave(self.conf.getValue(args[0]))
+                return
             case _:
                 print ("command not found", action, *args)
+
+ 
+
+    def timer(self, timer_runs):
+        print('START THREAD TIMER...')
+        while True:
+            finished = timer_runs.wait(3)   # 5 minutes
+            print('wait...', finished)
+            if finished:
+                break
+          
+            if  self.conf.getValue('AutoSave', 'bool'):
+                print('autosave...')
+                self.save()
+                 
+        print('THREAD ENDED...')

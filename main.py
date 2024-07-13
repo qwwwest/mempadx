@@ -3,25 +3,22 @@ from tkinter import ttk
 from views.main_view import MainView
 from controllers.main_controller import MainController
  
-import configparser
+import settings
 
 
 
 def main():
 
-    conf = configparser.ConfigParser(default_section = "Main", allow_no_value=True ) 
-    conf.optionxform = lambda option: option
-    conf.read("settings.ini") 
+    conf = settings.MemPadSettings.get_instance()
   
     controller = MainController(conf)
     controller.init_view(MainView)
-    controller.open(conf.get('Main', 'MRU' ))
+    controller.open(conf.getValue('MRU'))
     
 
     controller.view.mainloop()
 
-    with open('settings.ini', 'w') as configfile:
-        conf.write(configfile)
+    conf.save()
 
 
 

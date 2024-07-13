@@ -79,7 +79,7 @@ class TreeView(tk.Frame):
         selected_item = self.tree.selection()[0]
         page_id = self.get_item_mid(selected_item)
 
-        new_title = askstring("New Page", "Enter title:\t\t\t\t\t")
+        new_title = self.getTitle("New Page", "Enter title:\t\t\t\t\t")
         if new_title:
             # self.tree.item(selected_item, text=new_title)
             Beep.dispatch('add_page_child', page_id, new_title)
@@ -93,7 +93,7 @@ class TreeView(tk.Frame):
         parent = self.tree.parent(selected_item)
         level = self.get_item_mlevel(selected_item)
 
-        title = askstring("New Page", "Enter title:\t\t\t\t\t")
+        title = self.getTitle("New Page", "Enter title:\t\t\t\t\t")
         
         if title:
             item = self.tree.insert(parent,index,text=title, values=(-1,level))
@@ -108,7 +108,7 @@ class TreeView(tk.Frame):
         parent = self.tree.parent(selected_item)
         level = self.get_item_mlevel(selected_item)
 
-        title = askstring("New Page", "Enter title:\t\t\t\t\t")
+        title = self.getTitle("New Page", "Enter title:\t\t\t\t\t")
         
         
         if title:
@@ -155,10 +155,17 @@ class TreeView(tk.Frame):
         selected_item = self.tree.selection()[0]
         page_id = self.get_item_mid(selected_item)
         current_title = self.tree.item(selected_item, "text")
-        new_title = askstring("Rename Page", "Enter new title:\t\t\t\t\t", initialvalue=current_title)
+        new_title = self.getTitle("Rename Page", "Enter new title:\t\t\t\t\t", initialvalue=current_title)
         if new_title and new_title != current_title:
             self.tree.item(selected_item, text=new_title)
             Beep.dispatch('page-title-has-changed',page_id, new_title)
+
+    def getTitle(self, title, prompt, **args):
+        
+        s = askstring(title, prompt, parent= self.parent, **args)
+        if s and len(s)>64:
+            s = s[0:64]
+        return s
 
 
     def on_start_drag(self, event):
