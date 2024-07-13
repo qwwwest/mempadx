@@ -74,15 +74,6 @@ class MainController:
  
                    
 
-    def set_autosave(self, state):
-        
-        if state :
-            self.timer_runs = threading.Event()
-            self.autosave_thread = threading.Thread(target=self.timer, args=(self.timer_runs,))
-            self.autosave_thread.start()
-        else: 
-            if hasattr(self, 'timer_runs') :
-                self.timer_runs.set()
 
 
     def on_drop_file(self, event):
@@ -357,12 +348,23 @@ class MainController:
             case _:
                 print ("command not found", action, *args)
 
- 
+
+
+    def set_autosave(self, state):
+        
+        if state :
+            self.timer_runs = threading.Event()
+            self.autosave_thread = threading.Thread(target=self.timer, args=(self.timer_runs,))
+            self.autosave_thread.start()
+        else: 
+            if hasattr(self, 'timer_runs') :
+                self.timer_runs.set()
+
 
     def timer(self, timer_runs):
         print('START THREAD TIMER...')
         while True:
-            finished = timer_runs.wait(3)   # 5 minutes
+            finished = timer_runs.wait(300)   # 5 minutes
             print('wait...', finished)
             if finished:
                 break
