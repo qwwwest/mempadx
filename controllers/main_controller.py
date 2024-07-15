@@ -7,7 +7,7 @@ import shutil
 from tkinterdnd2 import DND_FILES
 from tkinter.messagebox import askyesno
 from models.mempad_model import MemPadModel
-from views.main_view import MainView
+from  views.export_dialog import ExportDialog
 from tkinter.messagebox import showinfo
 import os.path
 from beep import Beep
@@ -140,8 +140,9 @@ class MainController:
         if self.conf.getValue('NoBackup') == False:
             shutil.copyfile(file, file + '.bak')
         self.populate_tree(self.model.current_page)
-        self.view.title('Mempad - '+file)
-        self.view.menu.add_open_mempad_file_item(file, True)
+
+        self.view.title('MemPadX - ' + self.model.filename )
+        self.view.menu.add_open_mempad_file_item(self.model.filename)
 
     def populate_tree(self, idsel = 0):
 
@@ -324,6 +325,10 @@ class MainController:
                 return
             case 'save_mempad_file':
                 self.save()
+                return            
+            case 'open_export_dialog':
+                self.open_export_dialog()
+
                 return
             case 'save_as_mempad_file':
                 print ('save_as_mempad_file args[0]=', args[0])
@@ -374,3 +379,19 @@ class MainController:
                 self.save()
                  
         print('THREAD ENDED...')
+    
+    
+    def open_export_dialog(self):
+
+        dialog = ExportDialog(self.view)
+        if dialog.result:
+            print("Export Settings:")
+            print(f"Format: {dialog.result['format']}")
+            print(f"File choice: {dialog.result['file_choice']}")
+            print(f"Autotitle: {dialog.result['autotitle']}")
+            print(f"Add Page Title: {dialog.result['add_page_title']}")
+            print(f"Document Title: {dialog.result['doc_title']}")
+            print(f"Export Folder: {dialog.result['export_folder']}")
+            # Here you can add your export logic
+
+ 

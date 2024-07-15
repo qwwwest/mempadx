@@ -24,7 +24,14 @@ class MenuView(tk.Menu):
         self.open_file = tk.IntVar()
        
         last_file = self.conf.getValue('MRU')
-        for i,file in enumerate(self.conf.getValue('LatestFiles').strip().split("\n")):
+        nLatestFile = self.conf.getValue('LatestFiles').strip().split("\n")
+        if not last_file in nLatestFile:
+            nLatestFile.append(last_file)
+
+        num_keep = self.conf.getValue('NumKeep','int') 
+        nLatestFile = nLatestFile[ -num_keep:] 
+
+        for i,file in enumerate(nLatestFile):
             
             self.add_open_mempad_file_item(file)
             if last_file == file:
@@ -38,7 +45,8 @@ class MenuView(tk.Menu):
         file_menu.add_command(label="Save", accelerator="Ctrl+S",command=self.bindcmd('save'))
         file_menu.add_command(label="Save as...", command=self.save_file_as_dialog)
  
-        file_menu.add_command(label="Exit", accelerator="ESC", command= self.bindcmd('exit') )
+        file_menu.add_command(label="Export...", command= self.bindcmd('open_export_dialog') )
+        file_menu.add_command(label="Exit", command= self.bindcmd('exit') )
  
         
         self.add_cascade(label="File", menu=file_menu)
@@ -123,9 +131,13 @@ class MenuView(tk.Menu):
     def bindcmd(self, action, *args):
         return lambda: Beep.dispatch('command', action, *args)
     
-    def add_open_mempad_file_item(self, file, add_first = False):
+    def add_open_mempad_file_item(self, file):
+        if file == '':
+            return
+ 
+        abspath = os.path.abspath(file)
         
-        if not file in self.latestFiles and os.path.isfile(file):
+        if not file in self.latestFiles and os.path.isfile(abspath):
          
             self.mempad_menu.add_radiobutton(
                 label=file,
@@ -133,20 +145,19 @@ class MenuView(tk.Menu):
                 value= len(self.latestFiles),
                 command=self.bindcmd('open_mempad_file', file),
             )
+     
+            
+            self.latestFiles.append(file)
 
-            if add_first :
-                self.latestFiles.insert(0, file)
-            else:    
-                self.latestFiles.append(file)
+            num_keep = self.conf.getValue('NumKeep','int') 
+            conf_value = "\n".join(self.latestFiles[ -num_keep:])
 
-            conf_value = "\n".join(self.latestFiles)
-            self.conf.setValue('LatestFiles', conf_value) 
+            self.conf.setValue('LatestFiles', conf_value ) 
+            
 
+ 
         # we update the menu checked item
         for i, latest_file in enumerate(self.latestFiles):
             if file == latest_file:
                 self.open_file.set(i)
-            #     self.mempad_menu.entryconfigure(i,state="disabled")
-            # else 
-            #     self.mempad_menu.entryconfigure(i,state="enabled")
-        #self.mempad_menu.entryconfigure(self.open_file.get(),state="disabled")
+ 

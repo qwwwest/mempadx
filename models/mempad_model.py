@@ -2,6 +2,7 @@
 import markdown
 import os
 import re
+from settings import MemPadSettings
 
 from beep import Beep
 
@@ -17,12 +18,23 @@ class MemPadModel:
     self.__filename = ''
     self.__dir = ''
    
+  
+  def relpath(self, filename):
+      try:
+        relpath =  os.path.relpath(filename,MemPadSettings.app_path )
+      except:
+        relpath = filename
+     
+      print("filename relpath", relpath)
+      return relpath
+  
   def open(self, filename):
     "read lst mempad file" 
     
     if not os.path.isfile(filename):
        Beep.dispatch('alert', "info",  f"File {filename} NOT found.")
        return False
+    
     
     self.__dir = os.path.dirname(os.path.realpath(__file__))
     mempad_str = self._read_mempad_file(filename)
@@ -55,7 +67,7 @@ class MemPadModel:
            "title": title, 
            "content": item})
       
-      
+    filename = self.relpath(filename)
     self.__pages = pages
     self.__filename = filename
      
@@ -239,7 +251,8 @@ class MemPadModel:
     mempad += chr(0)  
 
     try:
-      f = open(filename, 'w', encoding='utf-8')
+      abspath = os.path.abspath("filename")
+      f = open(abspath, 'w', encoding='utf-8')
       f.write(mempad)
       f.close()
     except:

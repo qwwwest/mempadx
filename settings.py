@@ -17,7 +17,7 @@ class MemPadSettings:
     def __init__(self):
         conf = configparser.ConfigParser(default_section = "Main", allow_no_value=True ) 
         conf.optionxform = lambda option: option
-        conf.read("settings.ini") 
+        conf.read(MemPadSettings.app_path + "/settings.ini") 
 
         self.conf = conf
         self.values = {}
@@ -25,15 +25,18 @@ class MemPadSettings:
         self.types = {}
     
     @staticmethod
-    def get_instance():
+    def get_instance(app_path = None):
         if not hasattr(MemPadSettings, '_instance'):
+            MemPadSettings.app_path = app_path
             MemPadSettings._instance = MemPadSettings()
+         
+ 
         return MemPadSettings._instance
  
 
     def save(self):
 
-        with open('settings.ini', 'w') as configfile:
+        with open(MemPadSettings.app_path + '/settings.ini', 'w') as configfile:
             self.conf.write(configfile)
 
     def getVariable(self, name, var_type = 'str'):
