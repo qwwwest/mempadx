@@ -251,7 +251,7 @@ class MemPadModel:
     mempad += chr(0)  
 
     try:
-      abspath = os.path.abspath("filename")
+      abspath = os.path.abspath(filename)
       f = open(abspath, 'w', encoding='utf-8')
       f.write(mempad)
       f.close()
