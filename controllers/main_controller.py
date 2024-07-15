@@ -383,7 +383,7 @@ class MainController:
     
     def open_export_dialog(self):
 
-        dialog = ExportDialog(self.view)
+        dialog = ExportDialog(self.view, self.model.filename)
         if dialog.result:
             print("Export Settings:")
             print(f"Format: {dialog.result['format']}")
@@ -392,6 +392,7 @@ class MainController:
             print(f"Add Page Title: {dialog.result['add_page_title']}")
             print(f"Document Title: {dialog.result['doc_title']}")
             print(f"Export Folder: {dialog.result['export_folder']}")
-            # Here you can add your export logic
+ 
+            self.model.export_to(dialog.result)
 
  

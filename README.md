@@ -1,32 +1,281 @@
-# MemPadPy
+# MemPadX
 
-- It is a work in Progress...
+## Welcome to MemPadX!
 
-MemPadPy is a port in Python of Mempad (for Windows).
-Mempad is a plain text outliner and note taking program with a structured index. 
-All pages are stored in a single file. 
+**MemPadX** is a plain text outliner and note taking program with a tree structured index. All pages are stored in a single file.
 
-I needed to use it in Linux but the windows app failed to work in Wine, so i decided to bring it to Linux by rewriting it in Python.
-
-The program offers standard editing functions including cut, copy, paste, undo/redo, drag&drop nodes to modify the tree structure.
-
-# Features
-
-- drag and drop to open mempad files (.lst)
-- drag and drop to reorder nodes in the tree structures 
-- autosave when exit
-- save configuration
-
-The windows version has many features i did not bring to Python because they were Windows specific.
+ ![MemPadX](mempadx.jpg)
 
 
-# other python projects used in MemPadPy
+The **README.md** file you are reading right now has been written in MemPadX and exported to Markdown within the app. MemPadX is a very convinient way to write and organize your documentation.
+ 
+It is a port in Python of **MemPad**, a Windows program made by 
+[Horst Schaeffer](https://horstmuc.de/wmem.htm). I needed to use MemPad in Linux but the program  failed to work in Wine, so i decided to bring it to Linux, MacOS, and more with a version written in python from scratch. 
 
-- Markdown
-- Forest-ttk-theme
+The "X" in **MemPadX** stands for cross-platform.
 
+## Features
+
+Editing functions :
+
+-  Copy, cut, paste, undo/redo...
+- Open files with drag&drop or menu
+- Keep a fast access of the latest mempad files
+- Save without prompting when you quit or open another mempad file
+- An Auto-Save option (every 5 minutes) is available in settings.
+- Designed as a "portable" program. 
+
+Tree structure:
+
+- Select a page with a single mouse click or by cursor control.
+- Nodes can be added, renamed, or deleted with the right-click menu
+- Drag&drop nodes to modify the tree structure.  
+- Double-click on an item to rename the page title.
+
+Settings are stored in the **settings.ini** file
+Settings can be changed in the Settings menu:
+
+- No Backup : no backup at opening file
+- ESC shortcut to quit.
+- Auto Save every 5 minutes.
+- Keep the app always on Top
+
+## Export
+
+MemPadX files can be exported to plain text, Markdown and to HTML.
+
+add_page_title : The title in the tree view will be added as the title
+autotitle : in the case of export to one page, the title level will be corrected. 
+
+For example "Export" is a level_1 menu and "What is Markdown" a level_2 menu.
+When exporting one file, they will be rendered like this :
+
+- exported to Markdown:
+
+    # Export
+    ## What is Markdown
+
+
+-  exported to HTML:
+
+    <h1>Export</h1>
+    <h2>What is Markdown</h2>
+
+
+You can insert Markdown in any page, it is supported out-of-the-box.
+
+### What is Markdown?
+
+Markdown is a lightweight markup language with plain text formatting syntax designed to make writing for the internet easier. Created by John Gruber in 2004, Markdown allows users to format text using simple, human-readable annotations that can be converted into HTML and other formats. It is widely used for creating rich text documents, writing posts for blogs, formatting readme files, and generating content for websites. Its simplicity and readability, even in raw form, make it a popular choice for developers, writers, and anyone needing to produce formatted text quickly and efficiently.
+
+### Example
+
+Here is an example of a Markdown document with Lorem Ipsum text and its corresponding HTML rendering
+This demonstrates the basic syntax of Markdown and how it gets translated into HTML for rendering in a web browser.
+
+### Markdown
+
+
+    # Heading 1
+
+    ## Heading 2
+
+    ### Heading 3
+
+    *This text is italicized.*
+
+    **This text is bold.**
+
+    ***This text is bold and italicized.***
+
+    Here is a link to [Github](https://www.github.com).
+
+    ![Placeholder Image](https://via.placeholder.com/150)
+
+    > This is a blockquote. It can span multiple lines and is useful for emphasizing quotes or important information.
+
+    Here is a code snippet:
+
+    ```
+    def hello_world():
+        print("Hello, world!")
+    ```
+
+    - Item 1 in an unordered list
+    - Item 2 in an unordered list
+
+    1. Item 1 in an ordered list
+    2. Item 2 in an ordered list
+
+    ---
+
+    | Header 1    | Header 2    |
+    |-------------|-------------|
+    | Row 1 Col 1 | Row 1 Col 2 |
+    | Row 2 Col 1 | Row 2 Col 2 |
+
+ 
+
+### HTML Rendering
+
+ 
+    <h1>Heading 1</h1>
+    <h2>Heading 2</h2>
+    <h3>Heading 3</h3>
+
+    <p><em>This text is italicized.</em></p>
+
+    <p><strong>This text is bold.</strong></p>
+
+    <p><strong><em>This text is bold and italicized.</em></strong></p>
+
+    <p>Here is a link to <a href="https://www.github.com">Github</a>.</p>
+
+    <p><img src="https://via.placeholder.com/150" alt="Placeholder Image"></p>
+
+    <blockquote>
+    <p>This is a blockquote. It can span multiple lines and is useful for emphasizing quotes or important information.</p>
+    </blockquote>
+
+    <p>Here is a code snippet:</p>
+
+    <pre><code>def hello_world():
+        print("Hello, world!")
+    </code></pre>
+
+    <ul>
+    <li>Item 1 in an unordered list</li>
+    <li>Item 2 in an unordered list</li>
+    </ul>
+
+    <ol>
+    <li>Item 1 in an ordered list</li>
+    <li>Item 2 in an ordered list</li>
+    </ol>
+
+    <hr>
+
+    <table>
+    <thead>
+        <tr>
+        <th>Header 1</th>
+        <th>Header 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+        <td>Row 1 Col 1</td>
+        <td>Row 1 Col 2</td>
+        </tr>
+        <tr>
+        <td>Row 2 Col 1</td>
+        <td>Row 2 Col 2</td>
+        </tr>
+    </tbody>
+    </table>
+
+### Basic Syntax
+
+These following elements form the core of Markdown's syntax, enabling you to create well-structured and readable documents with ease.
+
+1. **Headings**: Use `#` for headers. The number of `#` symbols indicates the level of the heading.
+   ```markdown
+   # Heading 1
+   ## Heading 2
+   ### Heading 3
+   ```
+
+2. **Emphasis**: Use asterisks or underscores for emphasis.
+   - *Italic*: `*italic*` or `_italic_`
+   - **Bold**: `**bold**` or `__bold__`
+   - ***Bold and italic***: `***bold and italic***` or `___bold and italic___`
+
+3. **Lists**:
+   - **Unordered lists**: Use `-`, `*`, or `+` for bullets.
+     ```markdown
+     - Item 1
+     - Item 2
+     ```
+   - **Ordered lists**: Use numbers followed by a period.
+     ```markdown
+     1. Item 1
+     2. Item 2
+     ```
+
+4. **Links**: Use `[text](url)`.
+   ```markdown
+   [OpenAI](https://www.openai.com)
+   ```
+
+5. **Images**: Use `![alt text](url)`.
+   ```markdown
+   ![MemPadX](mempadx.jpg)
+   ```
+
+6. **Blockquotes**: Use `>` at the beginning of a line.
+   ```markdown
+   > This is a blockquote.
+   ```
+
+7. **Code**:
+   - Inline code: Use backticks `` `code` ``
+   - Code blocks: Use triple backticks or indent with four spaces.
+     ```markdown
+     ```
+     def hello():
+         print("Hello, world!")
+     ```
+     ```
+
+8. **Horizontal Rule**: Use three or more `-`, `*`, or `_`.
+   ```markdown
+   ---
+   ```
+
+9. **Tables**: Use `|` to separate columns and `-` to create the header row.
+   ```markdown
+   | Header 1 | Header 2 |
+   |----------|----------|
+   | Row 1 Col 1 | Row 1 Col 2 |
+   | Row 2 Col 1 | Row 2 Col 2 |
+   ```
 
 ## Project Structure
+
+Here are some notes if you want to know more about the projects.
+
+### File Format
+
+# MemPad File Format 
+
+Here is the FileFormat used by MemPad for Python. 
+The python version uses the "New 3.++" format  of MemPad for Windows with UTF8 support only.
+
+File header              
+
+    header:           string
+        Magic Number         constant "MeMpAd." 
+        encoding      character, " " means Ansi, "." means UTF-8 file.
+        initial page  number to select at start (max. 5 characters)
+        
+    quick page path:  string (may be empty)
+
+
+For each Page:
+
+    level:            byte, binary 1..99 
+    
+    page title:       string (max 64 characters);
+                      if a TAB character is found, the rest of the string
+                      contains additional header information, currently the
+                      background color code ($nnnnnn) 
+                      
+    page contents:    string 
+
+
+Note: If the "MeMpAd " signature at the beginning of the file is not found, Mempad for windows assumes that this file is encrypted, and asks for the password. The Python version does not support it yet, so opening such a file will fail.
+
+### Project Structure
 
 The MVC Project Structure gives a well-organized application with a clean separation of concerns. The main view combines several subviews, each responsible for a part of the UI. The controller handles interactions and logic, keeping the model and view decoupled.
 

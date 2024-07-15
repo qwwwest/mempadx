@@ -44,15 +44,13 @@ class MenuView(tk.Menu):
         file_menu.add_command(label="New", accelerator="Ctrl+N",command=self.save_new_file_dialog)
         file_menu.add_command(label="Save", accelerator="Ctrl+S",command=self.bindcmd('save'))
         file_menu.add_command(label="Save as...", command=self.save_file_as_dialog)
- 
+        file_menu.add_separator( )
         file_menu.add_command(label="Export...", command= self.bindcmd('open_export_dialog') )
+        file_menu.add_separator( )
         file_menu.add_command(label="Exit", command= self.bindcmd('exit') )
  
         
         self.add_cascade(label="File", menu=file_menu)
-
-     
- 
 
         # OnTop = 0
         # ExitEsc = 0

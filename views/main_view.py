@@ -75,7 +75,7 @@ class MainView(TkinterDnD.Tk):
         self.width = 0
         self.height = 0
 
-        
+        self.always_on_top(self.conf.getValue('OnTop', 'bool'))
 
 
         self.bind("<Configure>", self.on_window_resize)

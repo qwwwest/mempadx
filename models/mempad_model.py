@@ -2,6 +2,7 @@
 import markdown
 import os
 import re
+from pathlib import Path
 from settings import MemPadSettings
 
 from beep import Beep
@@ -115,7 +116,7 @@ class MemPadModel:
       p = self.__pages[id] 
       p["title"] = title   
 
-  def export_to_html(self,filename = None):
+  def _________export_to_html(self,filename = None):
     "write to html"  
     
     links = ''
@@ -143,6 +144,79 @@ class MemPadModel:
     f.write(html)
     f.close()
     
+  def export_to(self, result):
+    "export_to Markdown HTML Text"  
+    exts = {'Markdown': 'md', 'HTML':'html', 'Text': 'txt'}
+    format = result['format'] # Markdown HTML Text
+
+    ext = exts[format] # .md .html +txt
+    file_choice = result['file_choice'] # "One file"
+    one_file = file_choice == "One file"
+    autotitle = result['autotitle']
+    add_page_title = result['add_page_title']
+    doc_title = result['doc_title']
+    export_folder = result['export_folder'] 
+    if export_folder : 
+      export_folder += '/'
+   
+    
+    links = ''
+    pages = ''
+    filename =  Path(self.__filename).stem + '.' + ext
+    # filename = f'{self.__filename[0:-4]}.{ext}'
+    if autotitle:
+        if doc_title == '':
+           doc_title = f'{self.__filename[0:-4]}'
+        pages = "# " + doc_title + '\n\n'    
+    for page in self.__pages :
+      id, level, title, content =  page['id'], page['level'], page['title'],  page['content'],    
+      dots = ' ' * (level - 1)
+     
+      current_page = ""
+                 
+      if one_file and add_page_title and autotitle:
+        current_page =  ('#' * (level+1)) +  ' '+ page['title'] + '\n\n'
+      
+      current_page +=  (page['content'].strip()) + '\n\n'
+
+
+         
+      # if title[:-4] != '.ini' :
+      #   
+      pages += current_page  
+
+
+    if ext == 'html':
+       pages = markdown.markdown(pages)
+       pages = f"""
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>{doc_title}</title>
+              <style>
+              code {{white-space: pre;}}
+              </style>
+              <main>
+              {pages}
+              <main>
+          </head>
+          <body>
+              
+          </body>
+          </html>
+          """
+    # html = MemPadModel.__readFile(self.__dir + '/assets/template.html')
+    # css = MemPadModel.__readFile(self.__dir + '/assets/mempad.css')
+    # js = MemPadModel.__readFile(self.__dir + '/assets/mempad.js')
+    # html = html.format(links=links, pages = pages, css = css, js = js)
+
+    
+    f = open(export_folder + filename, 'w', encoding='utf-8')
+    f.write(pages)
+    f.close()
+
   def ________get_data(self):
       return str(self.__num_pages) + ' pages'
   
