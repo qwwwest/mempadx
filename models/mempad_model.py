@@ -322,7 +322,8 @@ class MemPadModel:
     for page in self.__pages:
       mempad += chr(page['level']) + page['title'] + chr(0) + page['content'] + chr(0)
 
-    mempad += chr(0)  
+    # mempad += chr(0)  (this was a bug ^^)
+    # mempad.rstrip('\0') + '\0'
 
     try:
       abspath = os.path.abspath(filename)
