@@ -25,9 +25,11 @@ class MemPadSettings:
         self.types = {}
     
     @staticmethod
-    def get_instance(app_path = None):
+    def get_instance(app_path = None, is_app = None, theme = None):
         if not hasattr(MemPadSettings, '_instance'):
             MemPadSettings.app_path = app_path
+            MemPadSettings.is_app = is_app
+            MemPadSettings.theme = theme
             MemPadSettings._instance = MemPadSettings()
          
  

@@ -13,6 +13,7 @@ import os.path
 from beep import Beep
 import threading
 import time
+from settings import MemPadSettings
 
 class MainController:
 
@@ -42,7 +43,10 @@ class MainController:
         self.view = View(self, self.conf)
 
         # Import the tcl file
-        self.view.tk.call('source', '/www/py/mempad/views/themes/Forest-ttk-theme/forest-light.tcl')
+       
+        
+        
+        self.view.tk.call('source', MemPadSettings.theme)
 
         # Set the theme with the theme_use method
         ttk.Style().theme_use('forest-light')
