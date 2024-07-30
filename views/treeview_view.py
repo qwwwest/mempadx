@@ -76,12 +76,14 @@ class TreeView(tk.Frame):
         return int(self.tree.item(item, "values")[1])
 
     def add_child_item(self):
+
         selected_item = self.tree.selection()[0]
         page_id = self.get_item_mid(selected_item)
-
+        Beep.dispatch('save_page_to_model', page_id)
         new_title = self.getTitle("New Page", "Enter title:\t\t\t\t\t")
         if new_title:
             # self.tree.item(selected_item, text=new_title)
+            
             Beep.dispatch('add_page_child', page_id, new_title)
             
 
@@ -89,6 +91,9 @@ class TreeView(tk.Frame):
     def add_item_before(self):
         selected_item = self.tree.selection()[0]
         
+        page_id = self.get_item_mid(selected_item)
+        Beep.dispatch('save_page_to_model', page_id)
+
         index = self.tree.index(selected_item)
         parent = self.tree.parent(selected_item)
         level = self.get_item_mlevel(selected_item)
@@ -104,6 +109,9 @@ class TreeView(tk.Frame):
     def add_item_after(self):
         selected_item = self.tree.selection()[0]
         
+        page_id = self.get_item_mid(selected_item)
+        Beep.dispatch('save_page_to_model', page_id)
+
         index = self.tree.index(selected_item)
         parent = self.tree.parent(selected_item)
         level = self.get_item_mlevel(selected_item)

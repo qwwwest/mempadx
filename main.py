@@ -21,7 +21,7 @@ def main():
        
         ## to check: sys._MEIPASS
     else:
-        # Normal development mode. Everything relative to "main.py"
+        # Normal mode. Everything relative to "main.py"
         mempadpath = os.path.abspath(os.path.dirname(__file__))
         is_app = False
         theme = os.path.abspath(os.path.dirname(__file__)) + '/views/themes/Forest-ttk-theme/forest-light.tcl'

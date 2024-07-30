@@ -28,6 +28,7 @@ class MainController:
         Beep.listen('tree-has-changed', self.tree_has_changed)
         Beep.listen('page-title-has-changed', self.page_title_has_changed)
         Beep.listen('add_page_child', self.add_page)
+        Beep.listen('save_page_to_model', self.save_page_to_model)
         Beep.listen('alert', self.alert)
         Beep.listen('info', self.info)
       
@@ -252,6 +253,13 @@ class MainController:
 
         if new_page:    
             self.populate_tree(self.model.current_page)
+
+    def save_page_to_model(self, _, m_id):
+        
+        self.model.set_content_by_id(m_id, self.view.textarea.content)
+           
+       
+
 
     def __________________________add_item_after(self, message, after_id):
         new_page = self.model.add_page_child(after_id, level_increment=0)

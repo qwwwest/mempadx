@@ -2,7 +2,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-
 class TextAreaView(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -18,6 +17,9 @@ class TextAreaView(tk.Frame):
 
 
         self.text.pack(expand=True, fill=tk.BOTH)
+
+            # Add the binding
+        self.text.bind("<Control-Key-a>", lambda e: self.select_all() )
  
     # using property decorator 
     # a getter function for the content
@@ -31,4 +33,11 @@ class TextAreaView(tk.Frame):
         self.text.delete(1.0, tk.END)
         self.text.insert(tk.END, content)
 
- 
+    # Select all the text in textbox
+    def select_all(self):
+        self.text.tag_add(tk.SEL, "1.0", tk.END)
+        self.text.mark_set(tk.INSERT, "1.0")
+        self.text.see(tk.INSERT)
+        
+      
+    
