@@ -142,7 +142,7 @@ class MainController:
         if not self.model.open(file):
            return
       
-        if self.conf.getValue('NoBackup') == False:
+        if self.conf.getValue('NoBackup', 'bool') == False:
             shutil.copyfile(file, file + '.bak')
         self.populate_tree(self.model.current_page)
 

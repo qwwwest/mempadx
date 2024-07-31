@@ -25,7 +25,7 @@ class TextAreaView(tk.Frame):
         self.text.pack(expand=True, fill=tk.BOTH)
 
             # Add the binding
-        self.text.bind("<Control-Key-a>", lambda e: self.select_all() )
+        self.text.bind("<Control-a>", self.select_all )
  
         self.text.bind("<KeyRelease>", self.setSimpleMarkdown)
 
@@ -47,10 +47,12 @@ class TextAreaView(tk.Frame):
         self.setSimpleMarkdown('blep')
 
     # Select all the text in textbox
-    def select_all(self):
+    def select_all(self, _):
+        print('selectaaaall')
         self.text.tag_add(tk.SEL, "1.0", tk.END)
         self.text.mark_set(tk.INSERT, "1.0")
         self.text.see(tk.INSERT)
+        return 'break'      
         
      
     def config(self):
@@ -102,9 +104,9 @@ class TextAreaView(tk.Frame):
         self.re_replace_all(r'^## (.+?)$', 'h2')
         self.re_replace_all(r'^### (.+?)$', 'h3')
 
-        self.re_replace_all(r' (\*\*.+?\*\*)(?!\*)', 'bold')
+        self.re_replace_all(r'(^| )(\*\*.+?\*\*)(?!\*)', 'bold')
         self.re_replace_all(r' _(.+?)_ ', 'italic')
-        self.re_replace_all(r'http[s]?\://[a-zA-Z0-9-./]+', 'link')
+        self.re_replace_all(r'http[s]?\://[a-zA-Z0-9-./?=]+', 'link')
         
 
             
