@@ -66,6 +66,7 @@ searchX = 0
 searchY = 0
 NoBackup = 1
 Win98crypt = 0
+renderMarkdown = 1
 DecryptFailWarn = 0
 MRU =  MemPadX.lst
 LatestFiles = MemPadX.lst

@@ -9,6 +9,8 @@ class TextAreaView(tk.Frame):
     def __init__(self, parent):
 
         super().__init__(parent)
+
+        self._renderMarkdown = False
         self.font_name = "TkFixedFont"
         self.font_size = 16
         self.pack(expand=True, fill=tk.BOTH)
@@ -29,6 +31,7 @@ class TextAreaView(tk.Frame):
  
         self.text.bind("<KeyRelease>", self.setSimpleMarkdown)
 
+        
         self.config()
        
 
@@ -89,16 +92,28 @@ class TextAreaView(tk.Frame):
   
          
 
-
-    
-    def setSimpleMarkdown(self,_):
-         
+    def clear_tags(self):
         self.text.tag_remove('h1', "1.0", tk.END)
         self.text.tag_remove('h2', "1.0", tk.END)
         self.text.tag_remove('h3', "1.0", tk.END)
         self.text.tag_remove('bold', "1.0", tk.END)
         self.text.tag_remove('italic', "1.0", tk.END)
         self.text.tag_remove('link', "1.0", tk.END)
+    
+    def renderMarkdown(self, state):
+        self._renderMarkdown = state
+        
+        if self._renderMarkdown:
+            self.setSimpleMarkdown('blep')
+        else:    
+            self.clear_tags()
+
+    def setSimpleMarkdown(self,_):
+
+        if not self._renderMarkdown:
+            return
+         
+        self.clear_tags()
 
         self.re_replace_all(r'^# (.+?)$', 'h1')
         self.re_replace_all(r'^## (.+?)$', 'h2')

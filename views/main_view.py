@@ -76,6 +76,8 @@ class MainView(TkinterDnD.Tk):
         self.height = 0
 
         self.always_on_top(self.conf.getValue('OnTop', 'bool'))
+       
+        self.renderMarkdown = self.conf.getValue('renderMarkdown', 'bool')
 
 
         self.bind("<Configure>", self.on_window_resize)
@@ -97,16 +99,12 @@ class MainView(TkinterDnD.Tk):
             self.height = winHeight = event.height 
             winX, winY = self.winfo_x(), self.winfo_y()
  
-
-            # self.conf.setValue('WinWidth', str(winWidth))
-            # self.conf.setValue('WinHeight',str(winHeight))
-            # self.conf.setValue('winX', str(winX))
-            # self.conf.setValue('winY', str(winY))
     
             self.conf.setValue('WinWidth', winWidth)
             self.conf.setValue('WinHeight',winHeight)
             self.conf.setValue('winX', winX)
             self.conf.setValue('winY', winY)
+            
             self.footer.label['text'] = f"X={winX}, Y={winY} Window: {winWidth}x{winHeight} [{self.winfo_screenwidth()}x{self.winfo_screenheight() }]"
             return
         

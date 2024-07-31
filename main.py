@@ -27,9 +27,6 @@ def main():
         theme = os.path.abspath(os.path.dirname(__file__)) + '/views/themes/Forest-ttk-theme/forest-light.tcl'
      
    
-
-
-
     os.chdir(mempadpath)
     
     conf = settings.MemPadSettings.get_instance(mempadpath, is_app, theme)

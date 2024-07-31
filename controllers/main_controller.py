@@ -76,8 +76,7 @@ class MainController:
        
         
         self.set_autosave(self.conf.getValue('AutoSave'))
- 
-                   
+        self.run_command('command','settings-update','renderMarkdown') 
 
 
 
@@ -318,6 +317,7 @@ class MainController:
  
 
 
+
     def run_command(self, command, action, *args ):  
         
         if command != 'command' :
@@ -358,10 +358,15 @@ class MainController:
             case 'settings-update':
                 self.conf.hasChanged(args[0])
                 if args[0] == 'OnTop':
-                   self.view.always_on_top(self.conf.getValue(args[0]))
+                    self.view.always_on_top(self.conf.getValue(args[0]))
+                    return
                 if args[0] == 'AutoSave':
-                   self.set_autosave(self.conf.getValue(args[0]))
-                return
+                    self.set_autosave(self.conf.getValue(args[0]))
+                    return 
+                if args[0] == 'renderMarkdown':
+                    value = self.conf.getValue(args[0])
+                    self.view.textarea.renderMarkdown(value)
+                    return
             case _:
                 print ("command not found", action, *args)
 

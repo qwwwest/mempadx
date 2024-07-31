@@ -56,6 +56,11 @@ class MenuView(tk.Menu):
         # ExitEsc = 0
         # AutoSave = 0
         # NoBackup = 1
+        settings_menu.add_checkbutton(
+            label="Render Markdown Live", 
+            command= self.bindcmd('settings-update','renderMarkdown'),
+            variable= self.conf.getVariable('renderMarkdown', 'bool')
+        )
 
         settings_menu.add_checkbutton(
             label="Exit on ESC", 
