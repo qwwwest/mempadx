@@ -38,6 +38,9 @@ class MenuView(tk.Menu):
                 self.open_file.set(i) 
 
          
+        # self.add_cascade(label="✖")
+        # self.add_cascade(label="▢")
+        # self.add_cascade(label="_")
         self.add_cascade(label="MemPad", menu=self.mempad_menu)
 
         file_menu.add_command(label="Open", accelerator="Ctrl+O",command=self.open_file_dialog)
