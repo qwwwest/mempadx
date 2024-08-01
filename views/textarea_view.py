@@ -148,3 +148,15 @@ class TextAreaView(tk.Frame):
                 matches.append((f"{i + 1}.{match.start()}", f"{i + 1}.{match.end()}"))
                 
         return matches
+    
+    def highlight_text(self, start_pos, end_pos):
+
+       
+
+        self.text.tag_remove('highlight', '1.0', tk.END)
+        if start_pos == None:
+            return
+        self.text.tag_add('highlight', start_pos, end_pos)
+        self.text.tag_config('highlight', background='yellow')
+        self.text.mark_set(tk.INSERT, end_pos)
+        self.text.see(start_pos)

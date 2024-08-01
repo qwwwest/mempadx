@@ -25,6 +25,12 @@ class MainController:
         self.current_page = None
         self.last_selected_item = None
 
+        self.model_to_view_id = []
+
+        self.search_results = []
+        self.search_index = -1
+        self.last_search_term = None
+
         Beep.listen('tree-has-changed', self.tree_has_changed)
         Beep.listen('page-title-has-changed', self.page_title_has_changed)
         Beep.listen('add_page_child', self.add_page)
@@ -68,6 +74,8 @@ class MainController:
          
         self.view.bind("<Control-o>", lambda e:self.view.menu.open_file_dialog())
         self.view.bind("<Control-n>", lambda e:self.view.menu.save_new_file_dialog())
+        self.view.bind("<Control-f>", lambda e:self.view.open_search_window(self))
+
         self.view.protocol("WM_DELETE_WINDOW", self.window_exit)
 
         self.view.drop_target_register(DND_FILES)
@@ -152,6 +160,8 @@ class MainController:
 
         parents = [""]
         tree = self.view.treeview.tree
+
+        self.model_to_view_id = []
   
         # we clean up the old tree
         for item in tree.get_children():
@@ -163,10 +173,20 @@ class MainController:
             if idx == idsel:
                 snode = node
             parents.insert(p["level"], node)
+ 
+            self.model_to_view_id.insert(p['id'], node)
 
         if snode:
             self.view.treeview.tree.selection_add(snode)
         self.last_selected_item = None
+        print(self.model_to_view_id)
+
+    def select_tree_item_with_model_id(self, model_id):
+
+        self.view.treeview.tree.selection_set(self.model_to_view_id[model_id])
+        self.on_treeview_select('blep')
+        
+
 
     def on_treeview_select_click(self, event):
 
@@ -413,3 +433,48 @@ class MainController:
             self.model.export_to(dialog.result)
 
  
+    # search_text, match_case, whole_word, regex_mode, from_top, search_forward
+    def search_text(self, search_term, match_case, whole_word, regex_mode, from_top, forward):
+        # self.model.set_text(self.view.get_text())
+        if search_term == '':
+            return
+        
+        if self.last_search_term != search_term:
+            self.search_results = []
+            self.search_index = -1
+            self.search_results = self.model.search(search_term, match_case, whole_word, regex_mode, from_top)
+            self.last_search_term = search_term
+
+
+        if not self.search_results:
+            self.view.textarea.highlight_text(None, None)
+            return
+        
+
+       
+        # m_id, match = 
+        if self.search_results:
+            if forward:
+                self.search_index = (self.search_index + 1) % len(self.search_results)
+            else:
+                self.search_index = (self.search_index - 1) % len(self.search_results)
+
+            m_id, match = self.search_results[self.search_index]
+
+           # if self.search_index != m_id:
+
+            #print(search_term, forward,  m_id, match,  self.search_index, len(self.search_results))
+                
+            self.select_tree_item_with_model_id(m_id)
+            
+            start_pos = f"1.0+{match.start()}c"
+            end_pos = f"1.0+{match.end()}c"
+            self.view.textarea.highlight_text(start_pos, end_pos)
+        
+        
+
+    def replace_text(self, search_term, replace_term, match_case, whole_word, regex_mode):
+        # self.model.set_text(self.view.get_text())
+        # self.model.replace(search_term, replace_term, match_case, whole_word, regex_mode)
+        # self.view.set_text(self.model.get_text())
+        pass

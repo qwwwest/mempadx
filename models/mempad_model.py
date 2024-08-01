@@ -368,3 +368,49 @@ class MemPadModel:
     
       Beep.dispatch('alert', "error", str(e)) 
       return False
+    
+
+  # search_text, match_case, whole_word, regex_mode, from_top, search_forward
+    
+  def search(self, search_term, match_case, whole_word, regex_mode, from_top):
+    import re
+
+    flags = 0 if match_case else re.IGNORECASE
+    if whole_word:
+        search_term = r'\b' + re.escape(search_term) + r'\b'
+    else:
+        search_term = re.escape(search_term)
+
+    if regex_mode:
+        search_pattern = search_term
+    else:
+        search_pattern = re.compile(search_term, flags)
+
+    matches = []
+    for page in self.__pages :
+        content = page['content']
+
+        #if search_pattern.search(content) is not None:
+      
+        for found in search_pattern.finditer(content):
+            matches.append((page['id'], found))
+          
+    # matches = list(search_pattern.finditer(content))
+    return matches
+  
+
+  def replace(self, search_term, replace_term, match_case, whole_word, regex_mode):
+    import re
+
+    flags = 0 if match_case else re.IGNORECASE
+    if whole_word:
+        search_term = r'\b' + re.escape(search_term) + r'\b'
+    else:
+        search_term = re.escape(search_term)
+
+    if regex_mode:
+        search_pattern = search_term
+    else:
+        search_pattern = re.compile(search_term, flags)
+
+    self.text_data = re.sub(search_pattern, replace_term, self.text_data)
