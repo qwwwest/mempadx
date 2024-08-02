@@ -439,16 +439,29 @@ class MainController:
         if search_term == '':
             return
         
-        if self.last_search_term != search_term:
+        # we create a tuple with the search and params, if any change we build the search result again
+        search_exp = (search_term, match_case, whole_word, regex_mode, from_top)
+        if self.last_search_term != search_exp:
             self.search_results = []
             self.search_index = -1
             self.search_results = self.model.search(search_term, match_case, whole_word, regex_mode, from_top)
-            self.last_search_term = search_term
-
-
-        if not self.search_results:
+            self.last_search_term = search_exp
             self.view.textarea.highlight_text(None, None)
-            return
+            self.view.update_results_label(0 , 0)
+            
+            items = []
+            
+            for m_id, match in self.search_results:
+                items.append(self.model_to_view_id[m_id])
+
+            self.view.treeview.change_treeview_item_color(items)
+
+             
+
+
+        # if not self.search_results:
+        #     self.view.textarea.highlight_text(None, None)
+        #     return
         
 
        
@@ -460,7 +473,7 @@ class MainController:
                 self.search_index = (self.search_index - 1) % len(self.search_results)
 
             m_id, match = self.search_results[self.search_index]
-
+            self.view.update_results_label(self.search_index +1, len(self.search_results))
            # if self.search_index != m_id:
 
             #print(search_term, forward,  m_id, match,  self.search_index, len(self.search_results))
@@ -470,11 +483,17 @@ class MainController:
             start_pos = f"1.0+{match.start()}c"
             end_pos = f"1.0+{match.end()}c"
             self.view.textarea.highlight_text(start_pos, end_pos)
-        
+            self.current_selected = (start_pos, end_pos)
+                        
         
 
     def replace_text(self, search_term, replace_term, match_case, whole_word, regex_mode):
         # self.model.set_text(self.view.get_text())
         # self.model.replace(search_term, replace_term, match_case, whole_word, regex_mode)
         # self.view.set_text(self.model.get_text())
+        (idx, lastidx) = self.current_selected 
+        self.view.textarea.text.delete(idx, lastidx)
+        self.view.textarea.text.insert(idx, replace_term)
+        
+
         pass

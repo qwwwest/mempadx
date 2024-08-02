@@ -17,6 +17,8 @@ class MainView(TkinterDnD.Tk):
 
         self.conf = conf
         self.search_window = None
+        self.search_param = None
+
  
 
         # Creating object of photoimage class for window icons
@@ -121,6 +123,8 @@ class MainView(TkinterDnD.Tk):
         # Implement the data cleanup logic here
         self.search_window.destroy()
         self.search_window = None
+        self.treeview.remove_treeview_item_color()
+        self.textarea.highlight_text(None,None)
 
 
     def open_search_window(self, controller):
@@ -142,6 +146,7 @@ class MainView(TkinterDnD.Tk):
         options_frame = ttk.Frame(self.search_window)
         options_frame.pack(fill='x', padx=10, pady=5)
 
+        self.search_param
         self.match_case_var = tk.BooleanVar()
         self.whole_word_var = tk.BooleanVar()
         self.regex_mode_var = tk.BooleanVar()
@@ -151,7 +156,7 @@ class MainView(TkinterDnD.Tk):
 
         ttk.Checkbutton(options_frame, text="Match case", variable=self.match_case_var).grid(row=0, column=0, sticky='w')
         ttk.Checkbutton(options_frame, text="Whole word", variable=self.whole_word_var).grid(row=0, column=1, sticky='w')
-        ttk.Checkbutton(options_frame, text="Regex Mode", variable=self.regex_mode_var).grid(row=0, column=2, sticky='w')
+       # ttk.Checkbutton(options_frame, text="Regex Mode", variable=self.regex_mode_var).grid(row=0, column=2, sticky='w')
         ttk.Checkbutton(options_frame, text="From Top", variable=self.from_top_var).grid(row=0, column=3, sticky='w')
         # ttk.Checkbutton(options_frame, text="Within Node", variable=self.from_top_var).grid(row=0, column=4, sticky='w')
         ttk.Checkbutton(options_frame, text="Replace", variable=self.replace_var, command=self.toggle_replace).grid(row=0, column=5, sticky='w')
@@ -169,11 +174,13 @@ class MainView(TkinterDnD.Tk):
 
         # search_text, match_case, whole_word, regex_mode, from_top, search_forward
         ttk.Button(button_frame, text="Previous", command=lambda: controller.search_text(self.find_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get(),self.from_top_var.get(), False)).pack(side='left',padx=(0, 5))
-
-        
          
         # search_text, match_case, whole_word, regex_mode, from_top, search_forward
         ttk.Button(button_frame, text="Next", command=lambda: controller.search_text(self.find_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get(), self.from_top_var.get(), True)).pack(side='left', padx=(5, 0))
+
+        self.results_label = ttk.Label(button_frame, text="Results: 0")
+        self.results_label.pack(side='left', padx=(10, 0))
+
 
         self.replace_frame = ttk.Frame(self.search_window)
         self.replace_frame.pack(fill='x', padx=10, pady=5)
@@ -190,3 +197,6 @@ class MainView(TkinterDnD.Tk):
             self.replace_frame.pack(fill='x', padx=10, pady=5)
         else:
             self.replace_frame.pack_forget()
+
+    def update_results_label(self, count, num_res):
+        self.results_label.config(text=f"Results: {count} / {num_res}")

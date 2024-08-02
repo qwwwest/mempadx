@@ -11,6 +11,7 @@ class TreeView(tk.Frame):
         self.controller = controller
         self.drag_data = {"item": None, "x": 0, "y": 0}
         self.ghost_node = None
+        self.colored = []
         self.create_widgets()
         
 
@@ -278,8 +279,24 @@ class TreeView(tk.Frame):
 
             self.tree.selection_set(item)
             Beep.dispatch('tree-has-changed', self.tree)
- 
-    def __________update(self):
-       # if event in ["page_added", "page_deleted", "page_renamed", "page_moved"]:
-             
-            Beep.dispatch('tree-has-changed', self.tree)      
+    
+    def change_treeview_item_color(self, items, color = 'yellow'):
+        # Create a tag with the desired background color
+        
+        self.remove_treeview_item_color()
+        self.tree.tag_configure('colored', background=color)
+        
+        # Apply the tag to each item in the list
+        for item in items:
+            self.tree.item(item, tags=('colored',))   
+
+        self.colored = items
+
+    def remove_treeview_item_color(self):
+    
+        # Remove the colored tag from self.colored
+        for item in  self.colored:
+            self.tree.item(item, tags='')
+        
+        
+        self.colored = []

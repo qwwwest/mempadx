@@ -387,7 +387,13 @@ class MemPadModel:
         search_pattern = re.compile(search_term, flags)
 
     matches = []
-    for page in self.__pages :
+
+    if from_top:
+       pages = self.__pages
+    else:
+       pages = self.__pages[self.__current_page:] + self.__pages[:self.__current_page]
+
+    for page in pages :
         content = page['content']
 
         #if search_pattern.search(content) is not None:
