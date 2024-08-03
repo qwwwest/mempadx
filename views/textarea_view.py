@@ -151,8 +151,6 @@ class TextAreaView(tk.Frame):
     
     def highlight_text(self, start_pos, end_pos):
 
-       
-
         self.text.tag_remove('highlight', '1.0', tk.END)
         if start_pos == None:
             return

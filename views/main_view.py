@@ -7,6 +7,7 @@ from views.treeview_view import TreeView
 from views.textarea_view import TextAreaView
 from views.footer_view import FooterView
 from tkinterdnd2 import DND_FILES, TkinterDnD
+from beep import Beep
 import os
 
 class MainView(TkinterDnD.Tk):
@@ -125,6 +126,7 @@ class MainView(TkinterDnD.Tk):
         self.search_window = None
         self.treeview.remove_treeview_item_color()
         self.textarea.highlight_text(None,None)
+        Beep.dispatch('on_close_search_window')
 
 
     def open_search_window(self, controller):
@@ -190,7 +192,11 @@ class MainView(TkinterDnD.Tk):
         self.replace_entry = ttk.Entry(self.replace_frame)
         self.replace_entry.pack(side='left', fill='x', expand=True, padx=5)
 
-        ttk.Button(self.replace_frame, text="Replace", command=lambda: controller.replace_text(self.find_entry.get(), self.replace_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get())).pack(side='left')
+        self.replace_button = ttk.Button(self.replace_frame, text="Replace", command=lambda: controller.replace_text(self.find_entry.get(), self.replace_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get()))
+
+
+        self.replace_button.pack(side='left')
+        self.replace_button["state"] = "disabled"
 
     def toggle_replace(self):
         if self.replace_var.get():
@@ -199,4 +205,9 @@ class MainView(TkinterDnD.Tk):
             self.replace_frame.pack_forget()
 
     def update_results_label(self, count, num_res):
-        self.results_label.config(text=f"Results: {count} / {num_res}")
+        if count == 0 and  num_res == 0 : 
+             self.results_label.config(text=f"No result")
+        elif count == 0 :
+            self.results_label.config(text=f"Results: {num_res}")
+        else:
+            self.results_label.config(text=f"Results: {count} / {num_res}")

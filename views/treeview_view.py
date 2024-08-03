@@ -236,7 +236,7 @@ class TreeView(tk.Frame):
             
         else:
             if event.y < h/2:
-                print('blep')
+                
                 self.tree.move(self.ghost_node, '', 0)
             else: 
                 self.tree.item(target,open=True)

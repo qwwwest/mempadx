@@ -22,7 +22,6 @@ class MainController:
         self.conf = conf
          
         #Beep.listen('model_new_file', self.info )
-        self.current_page = None
         self.last_selected_item = None
 
         self.model_to_view_id = []
@@ -37,6 +36,7 @@ class MainController:
         Beep.listen('save_page_to_model', self.save_page_to_model)
         Beep.listen('alert', self.alert)
         Beep.listen('info', self.info)
+        Beep.listen('on_close_search_window', self.on_close_search_window)
       
 
 
@@ -112,7 +112,7 @@ class MainController:
         self.conf.setValue('MRU', self.model.filename)
         self.save()
         self.view.destroy()
-        print("bye.")
+    
 
  
     def footer_info(self, ev = None ):
@@ -179,7 +179,7 @@ class MainController:
         if snode:
             self.view.treeview.tree.selection_add(snode)
         self.last_selected_item = None
-        print(self.model_to_view_id)
+ 
 
     def select_tree_item_with_model_id(self, model_id):
 
@@ -236,6 +236,7 @@ class MainController:
         page = self.model.get_page_by_id(id)
  
         self.view.textarea.content = page["content"]
+        self.model.current_page = id
         # after changing content, we reset the undo/redo stack
         self.view.textarea.text.edit_reset() 
         self.last_selected_item = new_selected_item
@@ -258,10 +259,7 @@ class MainController:
         self.model.set_content_by_id(id, view_content)
         self.model.current_page = id
         self.model.save(filename)
-
-    def ________________select_page(self, page):
-        self.model.current_page = page
-        return page.content
+ 
     
     def add_page(self, type, parent_id, title):
         if type == "add_page_child":
@@ -277,16 +275,6 @@ class MainController:
         
         self.model.set_content_by_id(m_id, self.view.textarea.content)
            
-       
-
-
-    def __________________________add_item_after(self, message, after_id):
-        new_page = self.model.add_page_child(after_id, level_increment=0)
-        self.view.treeview.populate_tree()
-
-    def _________________delete_item(self, page_id):
-        self.model.delete_page(page_id)
-        self.populate_tree()
 
     def tree_has_changed(self, *args):
        
@@ -439,7 +427,17 @@ class MainController:
         if search_term == '':
             return
         
-        # we create a tuple with the search and params, if any change we build the search result again
+        
+        selected_item = self.view.treeview.tree.selection()[0] 
+        m_id = self.view.treeview.get_item_mid(selected_item)
+        self.model.current_page = m_id
+        self.model.set_content_by_id(m_id, self.view.textarea.content)
+
+        
+
+        #self.model.set_content_by_id(self.model.current_page, view_content)
+        
+        # we create a tuple with the search term and params, if any change we build the search result again
         search_exp = (search_term, match_case, whole_word, regex_mode, from_top)
         if self.last_search_term != search_exp:
             self.search_results = []
@@ -447,32 +445,25 @@ class MainController:
             self.search_results = self.model.search(search_term, match_case, whole_word, regex_mode, from_top)
             self.last_search_term = search_exp
             self.view.textarea.highlight_text(None, None)
-            self.view.update_results_label(0 , 0)
+
             
             items = []
             
-            for m_id, match in self.search_results:
+            # list of ids in the tree (to keep model ids to tree ids track)
+            for m_id, _, _  in self.search_results:
                 items.append(self.model_to_view_id[m_id])
 
             self.view.treeview.change_treeview_item_color(items)
 
-             
-
-
-        # if not self.search_results:
-        #     self.view.textarea.highlight_text(None, None)
-        #     return
+        self.view.replace_button["state"] = "disabled"
         
-
-       
-        # m_id, match = 
         if self.search_results:
             if forward:
                 self.search_index = (self.search_index + 1) % len(self.search_results)
             else:
                 self.search_index = (self.search_index - 1) % len(self.search_results)
 
-            m_id, match = self.search_results[self.search_index]
+            m_id, start, end = self.search_results[self.search_index]
             self.view.update_results_label(self.search_index +1, len(self.search_results))
            # if self.search_index != m_id:
 
@@ -480,10 +471,17 @@ class MainController:
                 
             self.select_tree_item_with_model_id(m_id)
             
-            start_pos = f"1.0+{match.start()}c"
-            end_pos = f"1.0+{match.end()}c"
+            start_pos = f"1.0+{start}c"
+            end_pos = f"1.0+{end}c"
             self.view.textarea.highlight_text(start_pos, end_pos)
-            self.current_selected = (start_pos, end_pos)
+            self.current_selected = (m_id, start, end)
+            self.view.replace_button["state"] = "normal"
+        else: 
+            self.view.update_results_label(0 , 0)
+
+
+       
+           
                         
         
 
@@ -491,9 +489,47 @@ class MainController:
         # self.model.set_text(self.view.get_text())
         # self.model.replace(search_term, replace_term, match_case, whole_word, regex_mode)
         # self.view.set_text(self.model.get_text())
-        (idx, lastidx) = self.current_selected 
+        (m_id, start, end) = self.current_selected 
+
+        idx = f"1.0+{start}c"
+        lastidx = f"1.0+{end}c"
+
+        if(m_id != self.model.current_page):
+             print (m_id, self.model.current_page)
+             self.view.replace_button["state"] = "disabled"
+             return
+        
         self.view.textarea.text.delete(idx, lastidx)
         self.view.textarea.text.insert(idx, replace_term)
+
+       
+        # after the text is replaced, we save it to the model
+        view_content = self.view.textarea.content
+        self.model.set_content_by_id(m_id, view_content)
+
+        del self.search_results[self.search_index] 
+
+        delta = len(replace_term) - len(search_term) 
+        index = self.search_index
+
+        for m_id_n, start_n, end_n  in self.search_results[self.search_index:]:
+            if m_id_n != m_id:
+                break
+            self.search_results[index] = (m_id_n, start_n + delta, end_n + delta)
+            index += 1
+             
+        self.search_index -= 1
+        self.view.replace_button["state"] = "disabled"
+
+        self.view.update_results_label(self.search_index+1, len(self.search_results))
+
+        
         
 
-        pass
+
+        
+    def on_close_search_window(self, _):
+        # Implement the data cleanup logic here
+        self.search_results = []
+        self.search_index = -1
+        self.last_search_term = None

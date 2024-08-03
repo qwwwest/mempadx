@@ -399,7 +399,9 @@ class MemPadModel:
         #if search_pattern.search(content) is not None:
       
         for found in search_pattern.finditer(content):
-            matches.append((page['id'], found))
+            start = found.start() 
+            end = found.end()
+            matches.append((page['id'], start, end))
           
     # matches = list(search_pattern.finditer(content))
     return matches
