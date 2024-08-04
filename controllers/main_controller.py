@@ -14,12 +14,14 @@ from beep import Beep
 import threading
 import time
 from settings import MemPadSettings
+from controllers.search_controller import SearchController
 
 class MainController:
 
     def __init__(self, conf):
         self.model = MemPadModel()
         self.conf = conf
+        
          
         #Beep.listen('model_new_file', self.info )
         self.last_selected_item = None
@@ -36,11 +38,7 @@ class MainController:
         Beep.listen('save_page_to_model', self.save_page_to_model)
         Beep.listen('alert', self.alert)
         Beep.listen('info', self.info)
-        Beep.listen('on_close_search_window', self.on_close_search_window)
-      
-
-
-
+ 
         # run command in menus bar (File, Settings...)
         Beep.listen('command', self.run_command)
  
@@ -49,10 +47,10 @@ class MainController:
  
         self.view = View(self, self.conf)
 
+        self.search_controller = SearchController(self.model, self.view, self)
+
         # Import the tcl file
        
-        
-        
         self.view.tk.call('source', MemPadSettings.theme)
 
         # Set the theme with the theme_use method
@@ -74,7 +72,7 @@ class MainController:
          
         self.view.bind("<Control-o>", lambda e:self.view.menu.open_file_dialog())
         self.view.bind("<Control-n>", lambda e:self.view.menu.save_new_file_dialog())
-        self.view.bind("<Control-f>", lambda e:self.view.open_search_window(self))
+
 
         self.view.protocol("WM_DELETE_WINDOW", self.window_exit)
 
@@ -112,8 +110,6 @@ class MainController:
         self.conf.setValue('MRU', self.model.filename)
         self.save()
         self.view.destroy()
-    
-
  
     def footer_info(self, ev = None ):
             
@@ -322,8 +318,6 @@ class MainController:
 
             self.walk_tree(self.view.treeview.tree.get_children(child), level + 1, pages) 
         
- 
-
 
 
     def run_command(self, command, action, *args ):  
@@ -419,117 +413,3 @@ class MainController:
             print(f"Export Folder: {dialog.result['export_folder']}")
  
             self.model.export_to(dialog.result)
-
- 
-    # search_text, match_case, whole_word, regex_mode, from_top, search_forward
-    def search_text(self, search_term, match_case, whole_word, regex_mode, from_top, forward):
-        # self.model.set_text(self.view.get_text())
-        if search_term == '':
-            return
-        
-        
-        selected_item = self.view.treeview.tree.selection()[0] 
-        m_id = self.view.treeview.get_item_mid(selected_item)
-        self.model.current_page = m_id
-        self.model.set_content_by_id(m_id, self.view.textarea.content)
-
-        
-
-        #self.model.set_content_by_id(self.model.current_page, view_content)
-        
-        # we create a tuple with the search term and params, if any change we build the search result again
-        search_exp = (search_term, match_case, whole_word, regex_mode, from_top)
-        if self.last_search_term != search_exp:
-            self.search_results = []
-            self.search_index = -1
-            self.search_results = self.model.search(search_term, match_case, whole_word, regex_mode, from_top)
-            self.last_search_term = search_exp
-            self.view.textarea.highlight_text(None, None)
-
-            
-            items = []
-            
-            # list of ids in the tree (to keep model ids to tree ids track)
-            for m_id, _, _  in self.search_results:
-                items.append(self.model_to_view_id[m_id])
-
-            self.view.treeview.change_treeview_item_color(items)
-
-        self.view.replace_button["state"] = "disabled"
-        
-        if self.search_results:
-            if forward:
-                self.search_index = (self.search_index + 1) % len(self.search_results)
-            else:
-                self.search_index = (self.search_index - 1) % len(self.search_results)
-
-            m_id, start, end = self.search_results[self.search_index]
-            self.view.update_results_label(self.search_index +1, len(self.search_results))
-           # if self.search_index != m_id:
-
-            #print(search_term, forward,  m_id, match,  self.search_index, len(self.search_results))
-                
-            self.select_tree_item_with_model_id(m_id)
-            
-            start_pos = f"1.0+{start}c"
-            end_pos = f"1.0+{end}c"
-            self.view.textarea.highlight_text(start_pos, end_pos)
-            self.current_selected = (m_id, start, end)
-            self.view.replace_button["state"] = "normal"
-        else: 
-            self.view.update_results_label(0 , 0)
-
-
-       
-           
-                        
-        
-
-    def replace_text(self, search_term, replace_term, match_case, whole_word, regex_mode):
-        # self.model.set_text(self.view.get_text())
-        # self.model.replace(search_term, replace_term, match_case, whole_word, regex_mode)
-        # self.view.set_text(self.model.get_text())
-        (m_id, start, end) = self.current_selected 
-
-        idx = f"1.0+{start}c"
-        lastidx = f"1.0+{end}c"
-
-        if(m_id != self.model.current_page):
-             print (m_id, self.model.current_page)
-             self.view.replace_button["state"] = "disabled"
-             return
-        
-        self.view.textarea.text.delete(idx, lastidx)
-        self.view.textarea.text.insert(idx, replace_term)
-
-       
-        # after the text is replaced, we save it to the model
-        view_content = self.view.textarea.content
-        self.model.set_content_by_id(m_id, view_content)
-
-        del self.search_results[self.search_index] 
-
-        delta = len(replace_term) - len(search_term) 
-        index = self.search_index
-
-        for m_id_n, start_n, end_n  in self.search_results[self.search_index:]:
-            if m_id_n != m_id:
-                break
-            self.search_results[index] = (m_id_n, start_n + delta, end_n + delta)
-            index += 1
-             
-        self.search_index -= 1
-        self.view.replace_button["state"] = "disabled"
-
-        self.view.update_results_label(self.search_index+1, len(self.search_results))
-
-        
-        
-
-
-        
-    def on_close_search_window(self, _):
-        # Implement the data cleanup logic here
-        self.search_results = []
-        self.search_index = -1
-        self.last_search_term = None

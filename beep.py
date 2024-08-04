@@ -18,5 +18,18 @@ class Beep(object):
                 func(event_name, *args)
 
     @classmethod
-    def blep(cls):
-        print('blep')
+    def remove(cls, event_name, handler):
+        if event_name not in cls._listeners:
+            # event_name not used is an empty list
+            return
+            
+        handlers_array = cls._listeners[event_name]
+        for idx, handler_item in enumerate(handlers_array): 
+            if handler_item == handler :
+                del handlers_array[idx]
+    
+    @classmethod
+    def removeEvent(cls, event_name):
+        if event_name in cls._listeners:
+            del cls._listeners[event_name]
+       
