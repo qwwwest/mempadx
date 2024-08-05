@@ -49,7 +49,7 @@ The Search & Replace functionality allows you to quickly find specific text with
 
 ![MemPadX](search.jpg)
 
-When you open the search window <Control+F>, any selected text string is copied to the search string field (if not longer than 48 characters and within a line). Trailing spaces will be removed. 
+When you open the search window **Control+F**, any selected text string is copied to the search string field (if not longer than 48 characters and within a line). Trailing spaces will be removed. 
 
 Options:
 -  Case Sensitive
@@ -65,8 +65,8 @@ Unless searching "From Top", the search starts at the cursor position.
 
 To continue the search :
 
-to go forward: click the next button, or the <down arrow> or <Return>. 
-to go backward:  click the previous button, or the up arrow or <Ctrl+Return>. 
+to go forward: click the next button, or the **down arrow** or **Return**. 
+to go backward:  click the previous button, or the up arrow or **Ctrl+Return**. 
 
 An automatic "reset" is done, when the search string is changed, or an option is change.  
 
@@ -80,7 +80,7 @@ Make sure you click the checkbox "Replace" in the option.
 
 To start a search & replace operation, first find the first instance (as seen above).
 
-To replace the text, press the Replace button or <Ctrl+R>.
+To replace the text, press the Replace button or **Ctrl+R**.
 You will see  the result of the replacement, before you decide to continue to search "Down" (or "Up"). 
 
 You can use Control+R instead of the "Replace" button
