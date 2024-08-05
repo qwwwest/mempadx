@@ -50,6 +50,8 @@ class SearchWindow(tk.Toplevel):
         # self.from_top_var = tk.BooleanVar()
         self.replace_var = tk.BooleanVar(value=replace)   
 
+   
+
         ttk.Checkbutton(options_frame, text="Match case", variable=self.match_case_var).grid(row=0, column=0, sticky='w')
         ttk.Checkbutton(options_frame, text="Whole word", variable=self.whole_word_var).grid(row=0, column=1, sticky='w')
        # ttk.Checkbutton(options_frame, text="Regex Mode", variable=self.regex_mode_var).grid(row=0, column=2, sticky='w')
@@ -70,24 +72,26 @@ class SearchWindow(tk.Toplevel):
         button_frame.pack(fill='x', padx=10, pady=5)
 
         # search_text, match_case, whole_word, regex_mode, from_top, search_forward
-        ttk.Button(button_frame, text="Previous", command=lambda: Beep.dispatch('search_text',self.find_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get(),self.from_top_var.get(),self.replace_var.get(), False)).pack(side='left',padx=(0, 5))
+        ttk.Button(button_frame, text="Previous", command=self.find_previous).pack(side='left', padx=(0, 5))
          
         # search_text, match_case, whole_word, regex_mode, from_top, search_forward
-        ttk.Button(button_frame, text="Next", command=lambda: Beep.dispatch('search_text',self.find_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get(), self.from_top_var.get(),self.replace_var.get(), True)).pack(side='left', padx=(5, 0))
+        ttk.Button(button_frame, text="Next", command= self.find_next).pack(side='left', padx=(5, 0))
 
         self.results_label = ttk.Label(button_frame, text="Results: 0")
         self.results_label.pack(side='left', padx=(10, 0))
 
 
         self.replace_frame = ttk.Frame(self)
-        self.replace_frame.pack(fill='x', padx=10, pady=5)
-        self.replace_frame.pack_forget()  # Hide the replace frame initially
+        # self.replace_frame.pack(fill='x', padx=10, pady=5)
+        # self.replace_frame.pack_forget()  # Hide the replace frame initially
+
+       
 
         ttk.Label(self.replace_frame, text="With:").pack(side='left')
         self.replace_entry = ttk.Entry(self.replace_frame)
         self.replace_entry.pack(side='left', fill='x', expand=True, padx=5)
 
-        self.replace_button = ttk.Button(self.replace_frame, text="Replace", command=lambda: Beep.dispatch('replace_text',self.find_entry.get(), self.replace_entry.get() ))
+        self.replace_button = ttk.Button(self.replace_frame, text="Replace", command=self.replace )
 
 
         self.replace_button.pack(side='left')
@@ -97,9 +101,36 @@ class SearchWindow(tk.Toplevel):
  
         self.geometry(geom)
 
+        # Show / Hide the replace frame initially
+        self.show_replace(replace)
+
         # To make the new Search Window modal
         self.transient(self.parent)
         self.grab_set()
+
+    def find_next(self):
+        Beep.dispatch('search_text',self.find_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get(), self.from_top_var.get(),self.replace_var.get(), True)
+    
+    def find_previous(self):
+        Beep.dispatch('search_text',self.find_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get(), self.from_top_var.get(),self.replace_var.get(), False)
+    
+    def replace(self):
+        if self.replace_var.get() == False:
+            self.replace_var.set(True)
+            self.toggle_replace()
+            return
+
+        if self.replace_button["state"] == "disabled":
+            return
+        
+        Beep.dispatch('replace_text',self.find_entry.get(), self.replace_entry.get() )
+
+    def show_replace(self, show):
+         
+        if show:
+            self.replace_frame.pack(fill='x', padx=10, pady=5)
+        else:
+            self.replace_frame.pack_forget()
 
     def toggle_replace(self):
          
@@ -108,13 +139,13 @@ class SearchWindow(tk.Toplevel):
         else:
             self.replace_frame.pack_forget()
 
-    def update_results_label(self, count, num_res):
-        if count == 0 and  num_res == 0 : 
-             self.results_label.config(text=f"No result")
-        elif count == 0 :
-            self.results_label.config(text=f"Results: {num_res}")
-        else:
-            self.results_label.config(text=f"Results: {count} / {num_res}")
+    # def update_results_label(self, count, num_res):
+    #     if count == 0 and  num_res == 0 : 
+    #          self.results_label.config(text=f"No result")
+    #     elif count == 0 :
+    #         self.results_label.config(text=f"Results: {num_res}")
+    #     else:
+    #         self.results_label.config(text=f"Results: {count} / {num_res}")
  
 
     def on_close_search_window(self):

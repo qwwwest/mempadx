@@ -35,7 +35,10 @@ class TextAreaView(tk.Frame):
         self.config()
        
 
- 
+    def current_cursor_position(self):
+        count = len(self.text.get("1.0", tk.INSERT))
+        return count
+    
     # using property decorator 
     # a getter function for the content
     @property

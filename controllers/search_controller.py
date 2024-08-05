@@ -14,6 +14,7 @@ class SearchController:
 
         self.search_results = []
         self.search_index = -1
+        self.current_selected = None
         self.last_search_term = None
         self.last_search_param = None
         self.search_window = None
@@ -33,12 +34,12 @@ class SearchController:
 
 
 
-    # search_text, match_case, whole_word, regex_mode, from_top, search_forward
-    def search_text(self, *args):
+    # search_text, match_case, whole_word, regex_mode, from_top, replace, search_forward
+    def search_text(self, _, search_term, match_case, whole_word, regex_mode, from_top, replace, forward):
         # self.model.set_text(self.view.get_text())
-
-        (_, search_term, match_case, whole_word, regex_mode, from_top, replace, forward) = args
-        # search_term, match_case, whole_word, regex_mode, from_top, forward
+ 
+  
+         
         if search_term == '':
             return
         
@@ -46,15 +47,16 @@ class SearchController:
         m_id = self.view.treeview.get_item_mid(selected_item)
         self.model.current_page = m_id
         self.model.set_content_by_id(m_id, self.view.textarea.content)
+        current_cursor_position = self.view.textarea.current_cursor_position()
 
-        #self.model.set_content_by_id(self.model.current_page, view_content)
-        
+       
         # we create a tuple with the search term and params, if any change we build the search result again
         search_exp = (search_term, match_case, whole_word, regex_mode, from_top)
       
         if self.last_search_term != search_exp:
             self.search_results = []
             self.search_index = -1
+            self.current_selected = None
             self.search_results = self.model.search(search_term, match_case, whole_word, regex_mode, from_top)
             self.last_search_term = search_exp
             self.last_search_param = (search_term, match_case, whole_word, regex_mode, from_top, replace)
@@ -68,8 +70,23 @@ class SearchController:
 
             self.view.treeview.change_treeview_item_color(items)
 
+            
+
         self.search_window.replace_button["state"] = "disabled"
         
+        # to place the first result AFTER the cursor current position if result in the current page
+        if self.search_results and not from_top and  self.search_index == -1:
+            self.search_index = 0
+            m_id, start, end = self.search_results[self.search_index]
+            while start <= current_cursor_position and m_id == self.model.current_page :
+                self.search_index += 1
+                if self.search_index >= len(self.search_results):
+                    break
+                m_id, start, end = self.search_results[self.search_index]
+
+            if forward:
+                self.search_index -= 1
+
         if self.search_results:
             if forward:
                 self.search_index = (self.search_index + 1) % len(self.search_results)
@@ -77,7 +94,9 @@ class SearchController:
                 self.search_index = (self.search_index - 1) % len(self.search_results)
 
             m_id, start, end = self.search_results[self.search_index]
-            self.search_window.update_results_label(self.search_index +1, len(self.search_results))
+ 
+
+            self.update_results_label(self.search_index +1, len(self.search_results))
            # if self.search_index != m_id:
 
             #print(search_term, forward,  m_id, match,  self.search_index, len(self.search_results))
@@ -90,13 +109,16 @@ class SearchController:
             self.current_selected = (m_id, start, end)
             self.search_window.replace_button["state"] = "normal"
         else: 
-            self.search_window.update_results_label(0 , 0)
+            self.update_results_label(0 , 0)
 
     def replace_text(self, _, search_term, replace_term):
         # self.model.set_text(self.view.get_text())
         # self.model.replace(search_term, replace_term, match_case, whole_word, regex_mode)
         # self.view.set_text(self.model.get_text())
 
+        if self.current_selected == None:
+            return
+        
         (m_id, start, end) = self.current_selected 
 
         idx = f"1.0+{start}c"
@@ -129,7 +151,7 @@ class SearchController:
         self.search_index -= 1
         self.search_window.replace_button["state"] = "disabled"
 
-        self.search_window.update_results_label(self.search_index+1, len(self.search_results))
+        self.update_results_label(self.search_index+1, len(self.search_results))
 
         
     def on_close_search_window(self, _, pos_x, pos_y):
@@ -152,9 +174,32 @@ class SearchController:
         self.search_window = SearchWindow(self.view, self.pos_x, self.pos_y, self.last_search_param)
 
         self.search_window.bind("<Control-f>", lambda e:self.search_window.on_close_search_window())
+        self.search_window.bind("<Control-r>", lambda e:self.search_window.replace())
+        self.search_window.bind("<Return>", lambda e: self.search_window.find_next())
+        self.search_window.bind("<Control-Return>", lambda e: self.search_window.find_previous())
+
+        self.search_window.bind("<Down>", lambda e: self.search_window.find_next())
+        self.search_window.bind("<Up>", lambda e: self.search_window.find_previous())
+ 
         self.search_window.bind("<Escape>", lambda e:self.on_escape())
-    
+
+        self.update_results_label(None)
 
     def on_escape(self):
         self.search_window.on_close_search_window()
           
+        
+    def update_results_label(self, count = None, num_res = None):
+        
+        if count == None : 
+            label = ""
+        elif num_res == 0 : 
+            label = "No result"
+        elif count == 0 :
+            label = f"Results: {num_res}"
+        else:
+            label = f"Results: {count} / {num_res}"
+
+        
+        self.search_window.results_label.config(text=label)
+ 
