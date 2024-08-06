@@ -12,7 +12,7 @@ import os
 
 class SearchWindow(tk.Toplevel):
 
-    def __init__(self, parent, pos_x, pos_y, last_params):
+    def __init__(self, parent, pos_x, pos_y, last_params, selected_text):
         super().__init__(parent)
         self.parent = parent
         self.search_param = None
@@ -25,13 +25,7 @@ class SearchWindow(tk.Toplevel):
             # (search_term, match_case, whole_word, regex_mode, from_top, replace)
             self.last_params = ("", False, False, False, False, False)
 
-
-
-        self.create_widgets()
-
-    def create_widgets(self):
-
-        # self.search_window = tk.Toplevel(self)
+ 
        
         self.attributes('-topmost', True)
 
@@ -43,6 +37,12 @@ class SearchWindow(tk.Toplevel):
         options_frame.pack(fill='x', padx=10, pady=5)
 
         (search_term, match_case, whole_word, regex_mode, from_top, replace) = self.last_params
+
+        selected_text = selected_text.strip()
+        
+        if selected_text != None and len(selected_text)< 48 and not "\n" in selected_text:
+            search_term = selected_text
+
         self.match_case_var = tk.BooleanVar(value=match_case)
         self.whole_word_var = tk.BooleanVar(value=whole_word)
         self.regex_mode_var = tk.BooleanVar()

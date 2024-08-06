@@ -60,7 +60,15 @@ class TextAreaView(tk.Frame):
         self.text.see(tk.INSERT)
         return 'break'      
         
-     
+    # get the selected text, None if nothing
+    def get_selected_text(self, *_):
+        if self.text.tag_ranges(tk.SEL):
+            return self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
+        
+        return None      
+    
+
+
     def config(self):
         
         default_font = tkfont.nametofont(self.font_name)

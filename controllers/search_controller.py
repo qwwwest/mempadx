@@ -170,8 +170,11 @@ class SearchController:
         
         if self.search_window:
             return
+        
+        selected_text =  self.view.textarea.get_selected_text()
+
  
-        self.search_window = SearchWindow(self.view, self.pos_x, self.pos_y, self.last_search_param)
+        self.search_window = SearchWindow(self.view, self.pos_x, self.pos_y, self.last_search_param, selected_text)
 
         self.search_window.bind("<Control-f>", lambda e:self.search_window.on_close_search_window())
         self.search_window.bind("<Control-r>", lambda e:self.search_window.replace())
