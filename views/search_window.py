@@ -38,9 +38,12 @@ class SearchWindow(tk.Toplevel):
 
         (search_term, match_case, whole_word, regex_mode, from_top, replace) = self.last_params
 
-        selected_text = selected_text.strip()
         
+        if selected_text != None :
+            selected_text = selected_text.strip()
+
         if selected_text != None and len(selected_text)< 48 and not "\n" in selected_text:
+            selected_text = selected_text.strip()
             search_term = selected_text
 
         self.match_case_var = tk.BooleanVar(value=match_case)
@@ -82,11 +85,11 @@ class SearchWindow(tk.Toplevel):
 
 
         self.replace_frame = ttk.Frame(self)
-        # self.replace_frame.pack(fill='x', padx=10, pady=5)
+        self.replace_frame.pack(fill='x', padx=10, pady=5)
         # self.replace_frame.pack_forget()  # Hide the replace frame initially
 
        
-
+        
         ttk.Label(self.replace_frame, text="With:").pack(side='left')
         self.replace_entry = ttk.Entry(self.replace_frame)
         self.replace_entry.pack(side='left', fill='x', expand=True, padx=5)
@@ -96,14 +99,15 @@ class SearchWindow(tk.Toplevel):
 
         self.replace_button.pack(side='left')
         self.replace_button["state"] = "disabled"
+       
+        # self.show_replace(replace)
 
+      
         geom = f"+{self.pos_x}+{self.pos_y}"
  
         self.geometry(geom)
-
-        # Show / Hide the replace frame initially
-        self.show_replace(replace)
-
+      
+        
         # To make the new Search Window modal
         self.transient(self.parent)
         self.grab_set()
@@ -131,13 +135,31 @@ class SearchWindow(tk.Toplevel):
             self.replace_frame.pack(fill='x', padx=10, pady=5)
         else:
             self.replace_frame.pack_forget()
+        
+       
+
+    def infos(self):
+        
+        print('replace_frame', self.replace_frame.winfo_width() , self.replace_frame.winfo_height())
+        print('win', self.winfo_width() , self.winfo_height())
 
     def toggle_replace(self):
          
         if self.replace_var.get():
-            self.replace_frame.pack(fill='x', padx=10, pady=5)
+            # self.replace_frame.pack(fill='x', padx=10, pady=5)
+            self.replace_button["state"] = "disabled"
+             
+           
         else:
-            self.replace_frame.pack_forget()
+            # self.replace_frame.pack_forget()
+            self.replace_button["state"] = "normal"
+            
+        
+
+        
+        #self.replace_frame.update()
+  
+            # self.replace_frame.pack(expand=True, fill='both')
 
     # def update_results_label(self, count, num_res):
     #     if count == 0 and  num_res == 0 : 
