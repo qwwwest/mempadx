@@ -60,7 +60,7 @@ class SearchWindow(tk.Toplevel):
        # ttk.Checkbutton(options_frame, text="Regex Mode", variable=self.regex_mode_var).grid(row=0, column=2, sticky='w')
         ttk.Checkbutton(options_frame, text="From Top", variable=self.from_top_var).grid(row=0, column=3, sticky='w')
         # ttk.Checkbutton(options_frame, text="Within Node", variable=self.from_top_var).grid(row=0, column=4, sticky='w')
-        ttk.Checkbutton(options_frame, text="Replace", variable=self.replace_var, command=self.toggle_replace).grid(row=0, column=5, sticky='w')
+        #ttk.Checkbutton(options_frame, text="Replace", variable=self.replace_var, command=self.toggle_replace).grid(row=0, column=5, sticky='w')
 
         find_frame = ttk.Frame(self)
         find_frame.pack(fill='x', padx=10, pady=5)
@@ -119,40 +119,34 @@ class SearchWindow(tk.Toplevel):
         Beep.dispatch('search_text',self.find_entry.get(), self.match_case_var.get(), self.whole_word_var.get(), self.regex_mode_var.get(), self.from_top_var.get(),self.replace_var.get(), False)
     
     def replace(self):
-        if self.replace_var.get() == False:
-            self.replace_var.set(True)
-            self.toggle_replace()
-            return
+        # if self.replace_var.get() == False:
+        #     self.replace_var.set(True)
+        #     self.toggle_replace()
+        #     return
 
         if self.replace_button["state"] == "disabled":
             return
         
         Beep.dispatch('replace_text',self.find_entry.get(), self.replace_entry.get() )
 
-    def show_replace(self, show):
+    # def show_replace(self, show):
          
-        if show:
-            self.replace_frame.pack(fill='x', padx=10, pady=5)
-        else:
-            self.replace_frame.pack_forget()
+    #     if show:
+    #         self.replace_frame.pack(fill='x', padx=10, pady=5)
+    #     else:
+    #         self.replace_frame.pack_forget()
         
-       
-
-    def infos(self):
-        
-        print('replace_frame', self.replace_frame.winfo_width() , self.replace_frame.winfo_height())
-        print('win', self.winfo_width() , self.winfo_height())
-
-    def toggle_replace(self):
+   
+    # def toggle_replace(self):
          
-        if self.replace_var.get():
-            # self.replace_frame.pack(fill='x', padx=10, pady=5)
-            self.replace_button["state"] = "disabled"
+    #     if self.replace_var.get():
+    #         # self.replace_frame.pack(fill='x', padx=10, pady=5)
+    #         self.replace_button["state"] = "disabled"
              
            
-        else:
-            # self.replace_frame.pack_forget()
-            self.replace_button["state"] = "normal"
+    #     else:
+    #         # self.replace_frame.pack_forget()
+    #         self.replace_button["state"] = "normal"
             
         
 
