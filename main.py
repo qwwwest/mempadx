@@ -16,7 +16,7 @@ def main():
         # bundled-app mode. Everything is relative to executable folder before extraction
         mempadpath = os.path.abspath(os.path.dirname(sys.executable))
         is_app = True
-        theme = sys._MEIPASS + '/views/themes/Forest-ttk-theme/forest-light.tcl'
+        theme = sys._MEIPASS + '/views/themes/Forest-ttk-theme/forest-dark.tcl'
    
        
         ## to check: sys._MEIPASS
@@ -24,7 +24,7 @@ def main():
         # Normal mode. Everything relative to "main.py"
         mempadpath = os.path.abspath(os.path.dirname(__file__))
         is_app = False
-        theme = os.path.abspath(os.path.dirname(__file__)) + '/views/themes/Forest-ttk-theme/forest-light.tcl'
+        theme = os.path.abspath(os.path.dirname(__file__)) + '/views/themes/Forest-ttk-theme/forest-dark.tcl'
      
    
     os.chdir(mempadpath)

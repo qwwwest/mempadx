@@ -54,7 +54,7 @@ class MainController:
         self.view.tk.call('source', MemPadSettings.theme)
 
         # Set the theme with the theme_use method
-        ttk.Style().theme_use('forest-light')
+        ttk.Style().theme_use('forest-dark')
 
         # Bind treeview selection
         self.view.treeview.tree.bind("<<TreeviewSelect>>", self.on_treeview_select)

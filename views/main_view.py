@@ -7,6 +7,8 @@ from views.treeview_view import TreeView
 from views.textarea_view import TextAreaView
 from views.footer_view import FooterView
 from tkinterdnd2 import TkinterDnD
+import  views.themes.pywinstyles as pywinstyles
+import sys
 
 from beep import Beep
 import os
@@ -32,6 +34,12 @@ class MainView(TkinterDnD.Tk):
         # Setting icon of master window 
         self.iconphoto(False, self.ikon) 
 
+        #color titlebar hack
+        
+        # Example usage (replace `root` with the reference to your main/Toplevel window)
+        self.apply_theme_to_titlebar(self)
+
+        # self.overrideredirect(True)
 
         winWidth = self.conf.getValue('WinWidth', 'int')
         winHeight = self.conf.getValue('WinHeight', 'int') + 20
@@ -52,8 +60,10 @@ class MainView(TkinterDnD.Tk):
  
         self.geometry(geom)
         # self.attributes('-fullscreen', True)
-        # self.state('zoomed') 
+        self.state('zoomed') 
         self.menu = MenuView(self)
+
+
 
         #  self.toolbar = ToolbarView(self)
         #  self.toolbar.pack(side=tk.TOP, fill=tk.X)
@@ -112,3 +122,22 @@ class MainView(TkinterDnD.Tk):
           
             self.conf.setValue('Iwidth', event.width)
             return
+
+
+    def apply_theme_to_titlebar(self, root):
+
+        # if os is not Windows return.
+        if not hasattr(sys, 'getwindowsversion'):
+            return
+
+        version = sys.getwindowsversion()
+
+        if version.major == 10 and version.build >= 22000:
+            # Set the title bar color to the background color on Windows 11 for better appearance
+            pywinstyles.change_header_color(root, "#1c1c1c" )
+        elif version.major == 10:
+            pywinstyles.apply_style(root, "dark" )
+
+            # A hacky way to update the title bar's color on Windows 10 (it doesn't update instantly like on Windows 11)
+            root.wm_attributes("-alpha", 0.99)
+            root.wm_attributes("-alpha", 1)

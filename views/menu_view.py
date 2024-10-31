@@ -8,12 +8,17 @@ import os.path
 
 class MenuView(tk.Menu):
     def __init__(self, parent):
+
+        #      menubar = Menu(app, ) 
+        # super().__init__(parent, background='blue', fg='white')
         super().__init__(parent)
         self.parent = parent
         self.conf = parent.conf
         self.settings = MemPadSettings.get_instance()
         #self.latestFiles = 
-
+         
+        # Configure the background and foreground colors of the menu 
+        self.configure(bg='black', fg='white') 
         self.latestFiles = []
         self.mempad_menu = tk.Menu(self, tearoff=0)
         file_menu = tk.Menu(self, tearoff=0)
@@ -52,8 +57,8 @@ class MenuView(tk.Menu):
         file_menu.add_separator( )
         file_menu.add_command(label="Exit", command= self.bindcmd('exit') )
  
-        
-        self.add_cascade(label="File", menu=file_menu)
+        file_menu.entryconfig(0, foreground='black')
+        self.add_cascade(label="File", menu=file_menu,)
 
         # OnTop = 0
         # ExitEsc = 0
@@ -62,30 +67,43 @@ class MenuView(tk.Menu):
         settings_menu.add_checkbutton(
             label="Render Markdown Live", 
             command= self.bindcmd('settings-update','renderMarkdown'),
-            variable= self.conf.getVariable('renderMarkdown', 'bool')
+            variable= self.conf.getVariable('renderMarkdown', 'bool'),
+            background = '#666666',
+            foreground = 'white',
         )
+
+        
 
         settings_menu.add_checkbutton(
             label="Exit on ESC", 
             command= self.bindcmd('settings-update','ExitEsc'),
-            variable= self.conf.getVariable('ExitEsc', 'bool')
+            variable= self.conf.getVariable('ExitEsc', 'bool'),
+            background = '#666666',
+            foreground = 'white',
         )
 
         settings_menu.add_checkbutton(
             label="Auto Save", 
             command= self.bindcmd('settings-update','AutoSave'),
-            variable= self.conf.getVariable('AutoSave', 'bool')
+            variable= self.conf.getVariable('AutoSave', 'bool'),
+            background = '#666666',
+            foreground = 'white',
+             
         )
         settings_menu.add_checkbutton(
             label="Always On Top", 
             command= self.bindcmd('settings-update','OnTop'),
-            variable= self.conf.getVariable('OnTop', 'bool')
+            variable= self.conf.getVariable('OnTop', 'bool'),
+            background = '#666666',
+            foreground = 'white',
         )
  
         settings_menu.add_checkbutton(
             label="No BackUp", 
             command= self.bindcmd('settings-update','NoBackup'),
-            variable= self.conf.getVariable('NoBackup', 'bool')
+            variable= self.conf.getVariable('NoBackup', 'bool'),
+            background = '#666666',
+            foreground = 'white',
         )
         theme_menu = tk.Menu(self, tearoff=False)
         theme = tk.IntVar()
