@@ -2,7 +2,8 @@
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk
-
+from tkinter import messagebox
+import os
 import re
 
 class TextAreaView(tk.Frame):
@@ -11,11 +12,28 @@ class TextAreaView(tk.Frame):
         super().__init__(parent)
 
         self._renderMarkdown = False
-        self.font_name = "TkFixedFont"
+        # was self.font_name = "TkFixedFont"
+        # Define a monospace font for cross-platform consistency
+
+        self.font_name = "Courier"
+        
+        # Check if "DejaVu Sans Mono" is installed
+        if "DejaVu Sans Mono" in tkfont.families():
+            self.font_name = "DejaVu Sans Mono"
+        # Check if "Source Code Pro" is installed
+        if "Source Code Pro" in tkfont.families():
+            self.font_name = "Source Code Pro"
+     
+            
+
         self.font_size = 16
         self.pack(expand=True, fill=tk.BOTH)
-        text_font = tkfont.Font(family=self.font_name, size= self.font_size)
-        self.text = tk.Text(self, undo=True, font=text_font, wrap = tk.WORD)
+        
+       
+        self.monospace = tkfont.Font(family=self.font_name, size=self.font_size )
+
+    
+        self.text = tk.Text(self, undo=True, font= self.monospace , wrap = tk.WORD)
 
         # Create a vertical scrollbar
         self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.text.yview)
@@ -54,7 +72,7 @@ class TextAreaView(tk.Frame):
 
     # Select all the text in textbox
     def select_all(self, _):
-        print('selectaaaall')
+        
         self.text.tag_add(tk.SEL, "1.0", tk.END)
         self.text.mark_set(tk.INSERT, "1.0")
         self.text.see(tk.INSERT)
@@ -71,35 +89,29 @@ class TextAreaView(tk.Frame):
 
     def config(self):
         
-        default_font = tkfont.nametofont(self.font_name)
-
-
-        default_size = self.font_size
-        bold_font = tkfont.Font(**default_font.configure())
-        italic_font = tkfont.Font(**default_font.configure())
-        link_font = tkfont.Font(**default_font.configure())
-
-        h1_font = tkfont.Font(**default_font.configure())
-        h2_font = tkfont.Font(**default_font.configure())
-        h3_font = tkfont.Font(**default_font.configure())
-
-
-        bold_font.configure(weight="bold" ,size = default_size )
-        italic_font.configure(slant="italic", size = default_size)
-        link_font.configure(size = default_size,  underline=True)
-
-        h1_font.configure(size=int(default_size*1.8), weight="bold")
-        h2_font.configure(size=int(default_size*1.4), weight="bold")
-        h3_font.configure(size=int(default_size*1.2), weight="bold")
-
-
+        yellow = "#ffeeaa"
+        yellow2 = "#ffffCC"
+        green = "#88ffcc"
+        blue = "#ccccff"
+ 
+        h1_font = tkfont.Font(family=self.font_name, size=int(self.font_size * 1.6), weight="bold" )
+        h2_font = tkfont.Font(family=self.font_name, size=int(self.font_size * 1.2), weight="bold")
+        h3_font = tkfont.Font(family=self.font_name, size=int(self.font_size * 1.1), weight="bold")
+        bold_font = tkfont.Font(family=self.font_name,size = self.font_size, weight="bold")
+        italic_font = tkfont.Font(family=self.font_name,size = self.font_size, slant="italic")
+        link_font = tkfont.Font(family=self.font_name,size = self.font_size, underline=True)
+        
+        shortcode_font = tkfont.Font(family=self.font_name, size=int(self.font_size * 1.2), weight="bold")
+ 
         self.text.tag_configure("bold", font=bold_font)
         self.text.tag_configure("italic", font=italic_font)
-        self.text.tag_configure("link", font=link_font)
+        self.text.tag_configure("link", font=link_font, foreground=blue)
 
-        self.text.tag_configure("h1", font=h1_font, spacing3=default_size)
-        self.text.tag_configure("h2", font=h2_font, spacing3=default_size)
-        self.text.tag_configure("h3", font=h3_font, spacing3=default_size)
+        
+        self.text.tag_configure("h1", font=h1_font, foreground=yellow)
+        self.text.tag_configure("h2", font=h2_font,   foreground=yellow)
+        self.text.tag_configure("h3", font=h3_font,   foreground=yellow)
+        self.text.tag_configure("shortcode", font=shortcode_font,   foreground=green)
   
          
 
@@ -110,6 +122,7 @@ class TextAreaView(tk.Frame):
         self.text.tag_remove('bold', "1.0", tk.END)
         self.text.tag_remove('italic', "1.0", tk.END)
         self.text.tag_remove('link', "1.0", tk.END)
+        self.text.tag_remove('shortcode', "1.0", tk.END)
     
     def renderMarkdown(self, state):
         self._renderMarkdown = state
@@ -129,9 +142,12 @@ class TextAreaView(tk.Frame):
         self.re_replace_all(r'^# (.+?)$', 'h1')
         self.re_replace_all(r'^## (.+?)$', 'h2')
         self.re_replace_all(r'^### (.+?)$', 'h3')
+        self.re_replace_all(r'^\[(.+?)\]$', 'shortcode')
+        self.re_replace_all(r'^\[@@@(.+?)$', 'shortcode')
+        self.re_replace_all(r'^(.*?)@@@\]$', 'shortcode')
 
         self.re_replace_all(r'(^| )(\*\*.+?\*\*)(?!\*)', 'bold')
-        self.re_replace_all(r' _(.+?)_ ', 'italic')
+        self.re_replace_all(r' _(.+?)_', 'italic')
         self.re_replace_all(r'http[s]?\://[a-zA-Z0-9-./?=]+', 'link')
         
 
